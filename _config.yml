@@ -1,0 +1,16 @@
+title: Network Inspection Engine
+description: Implementasi Multiprocessing pada Analisis Keamanan Jaringan
+remote_theme: just-the-docs/just-the-docs
+
+# Konfigurasi warna
+color_scheme: dark
+
+# Mengaktifkan fitur pencarian (Search bar)
+search_enabled: true
+search:
+  tokenizer_separator: /[\s\-/]+/
+
+# Teks UI
+ui_text:
+  search_placeholder_text: "Search documentation..."
+
