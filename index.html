@@ -1,62 +1,882 @@
 ---
 layout: default
-title: Home
+title: Beranda
 nav_order: 1
+description: "Dokumentasi Parallel Network Traffic Inspection Engine — Implementasi Python Multiprocessing untuk Inspeksi Log Jaringan."
 ---
 
-# 🚀 Parallel Network Traffic Inspection Engine
+<style>
+  /* =====================================================
+     CUSTOM ARTICLE THEME — LIGHT & CLEAN
+     ===================================================== */
 
-<p class="fs-5 fw-300">
-  <strong>Mata Kuliah:</strong> IFB 206 Komputasi Paralel<br>
-  <strong>Proyek:</strong> Implementasi Multiprocessing pada Analisis Keamanan Jaringan
-</p>
+  /* Import Google Fonts */
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
----
+  :root {
+    --color-primary:    #2563eb;
+    --color-primary-light: #eff6ff;
+    --color-secondary:  #0ea5e9;
+    --color-accent:     #7c3aed;
+    --color-success:    #16a34a;
+    --color-warning:    #d97706;
+    --color-danger:     #dc2626;
+    --color-surface:    #ffffff;
+    --color-bg:         #f8fafc;
+    --color-border:     #e2e8f0;
+    --color-text:       #1e293b;
+    --color-muted:      #64748b;
+    --color-heading:    #0f172a;
+    --radius-sm:        6px;
+    --radius-md:        12px;
+    --radius-lg:        20px;
+    --shadow-sm:        0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+    --shadow-md:        0 4px 16px rgba(0,0,0,.08), 0 2px 8px rgba(0,0,0,.04);
+    --shadow-lg:        0 10px 40px rgba(0,0,0,.10), 0 4px 16px rgba(0,0,0,.06);
+  }
 
-## 📑 Daftar Isi
-1. [Latar Belakang](#1-latar-belakang)
-2. [Desain Arsitektur Sistem](#2-desain-arsitektur-sistem)
-3. [Analisis Performa](#3-analisis-performa)
-4. [Instruksi Eksekusi](#4-instruksi-eksekusi)
+  /* Base reset */
+  body, .main-content {
+    background: var(--color-bg) !important;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+    color: var(--color-text) !important;
+    line-height: 1.75 !important;
+  }
 
----
+  .main-content h1, .main-content h2,
+  .main-content h3, .main-content h4 {
+    font-family: 'Inter', sans-serif !important;
+    color: var(--color-heading) !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.02em;
+  }
 
-## 1. Latar Belakang 🌐
+  .main-content p, .main-content li {
+    color: var(--color-text) !important;
+    font-size: 1rem;
+  }
 
-Dalam manajemen jaringan dan telekomunikasi, melakukan pemindaian keamanan (*vulnerability assessment* atau *packet sniffing*) terhadap jutaan baris *log traffic* membutuhkan daya komputasi yang masif. 
+  /* ── HERO ────────────────────────────────────────── */
+  .hero-section {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #1d4ed8 100%);
+    border-radius: var(--radius-lg);
+    padding: 56px 48px;
+    margin-bottom: 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='28'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.2);
+    color: #bfdbfe;
+    border-radius: 100px;
+    padding: 4px 14px;
+    font-size: .78rem;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .hero-title {
+    font-size: clamp(1.8rem, 4vw, 2.8rem) !important;
+    font-weight: 800 !important;
+    color: #ffffff !important;
+    line-height: 1.2 !important;
+    margin: 0 0 16px !important;
+    letter-spacing: -0.03em;
+  }
+  .hero-subtitle {
+    color: #93c5fd !important;
+    font-size: 1.05rem !important;
+    margin: 0 0 32px !important;
+    font-weight: 400 !important;
+    max-width: 600px;
+  }
+  .hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .hero-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,.1);
+    border: 1px solid rgba(255,255,255,.15);
+    border-radius: var(--radius-sm);
+    padding: 8px 16px;
+    color: #e0f2fe !important;
+    font-size: .88rem;
+    font-weight: 500;
+    text-decoration: none !important;
+  }
+  .hero-meta-item span { font-weight: 300; opacity: .7; }
 
-Metode pemrosesan sekuensial konvensional seringkali memicu **bottleneck** yang menunda deteksi anomali. Proyek ini mendemonstrasikan efisiensi komputasi paralel menggunakan modul `multiprocessing` pada Python untuk mempercepat inspeksi *batch log* jaringan secara *real-time*.
+  /* ── TABLE OF CONTENTS ───────────────────────────── */
+  .toc-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-left: 4px solid var(--color-primary);
+    border-radius: var(--radius-md);
+    padding: 28px 32px;
+    margin-bottom: 40px;
+    box-shadow: var(--shadow-sm);
+  }
+  .toc-title {
+    font-size: .72rem !important;
+    font-weight: 700 !important;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--color-primary) !important;
+    margin: 0 0 14px !important;
+  }
+  .toc-list {
+    list-style: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 8px;
+  }
+  .toc-list li {
+    margin: 0 !important;
+  }
+  .toc-list a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    color: var(--color-primary) !important;
+    font-size: .9rem;
+    font-weight: 500;
+    text-decoration: none !important;
+    transition: all .2s ease;
+  }
+  .toc-list a:hover {
+    background: var(--color-primary-light);
+    border-color: var(--color-primary);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+  }
+  .toc-num {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: white !important;
+    font-size: .7rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
 
-## 2. Desain Arsitektur Sistem 🏗️
+  /* ── SECTION HEADERS ─────────────────────────────── */
+  .section-anchor {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 48px 0 20px !important;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--color-border);
+  }
+  .section-icon {
+    width: 40px; height: 40px;
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+  .icon-blue   { background: #dbeafe; }
+  .icon-purple { background: #ede9fe; }
+  .icon-green  { background: #dcfce7; }
+  .icon-orange { background: #ffedd5; }
+  .section-label {
+    font-size: .68rem !important;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--color-primary) !important;
+    display: block;
+    margin-bottom: 2px;
+  }
+  .section-title-text {
+    font-size: 1.45rem !important;
+    font-weight: 700 !important;
+    color: var(--color-heading) !important;
+    margin: 0 !important;
+    line-height: 1.3;
+  }
 
-Beban pemrosesan *log* didistribusikan secara merata ke seluruh *core logical* yang tersedia pada *server*, memecah antrean data menjadi beberapa eksekusi konkuren.
+  /* ── CONTENT CARDS ───────────────────────────────── */
+  .card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 28px 32px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow .2s ease;
+  }
+  .card:hover { box-shadow: var(--shadow-md); }
 
-```mermaid
-graph TD
-    A[Dataset: Batch Log Jaringan] --> B{Sistem Inspeksi}
-    B -->|Cara Lama| C[Sekuensial: 1 Core membaca baris per baris]
-    B -->|Cara Baru| D[Paralel: Pool Multiprocessing]
-    D --> E[Worker 1]
-    D --> F[Worker 2]
-    D --> G[Worker 3]
-    E & F & G --> H[Agregasi Status Keamanan]
-    C -.-> I[Deteksi Lambat / Bottleneck ⚠️]
-    H -.-> J[Deteksi Real-time & Cepat ⚡]
-```
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 20px 24px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .stat-icon {
+    width: 44px; height: 44px;
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+  .stat-value {
+    font-size: 1.6rem !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+    margin: 0 0 4px !important;
+    color: var(--color-heading) !important;
+  }
+  .stat-desc {
+    font-size: .82rem !important;
+    color: var(--color-muted) !important;
+    margin: 0 !important;
+    line-height: 1.4;
+  }
 
-## 3. Analisis Performa ⚡
+  /* ── CALLOUT / ALERT ─────────────────────────────── */
+  .callout {
+    display: flex;
+    gap: 16px;
+    padding: 20px 24px;
+    border-radius: var(--radius-md);
+    margin: 24px 0;
+    border: 1px solid;
+  }
+  .callout-info    { background: #eff6ff; border-color: #bfdbfe; }
+  .callout-success { background: #f0fdf4; border-color: #bbf7d0; }
+  .callout-warning { background: #fffbeb; border-color: #fde68a; }
+  .callout-body p { margin: 0 !important; font-size: .92rem !important; }
+  .callout-body strong { display: block; margin-bottom: 6px; font-size: .85rem; }
 
-Berdasarkan komputasi dari dataset *log*, hasil performa dapat diuji untuk membandingkan perbedaan kecepatan pemrosesan sekuensial dan paralel. **Pemrosesan paralel jauh lebih unggul** dalam memangkas waktu saat menangani data bervolume tinggi, menjaga kecepatan deteksi tetap stabil pada jaringan waktu nyata (*real-time processing*).
+  /* ── ARCHITECTURE DIAGRAM ────────────────────────── */
+  .arch-diagram {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 32px;
+    margin: 24px 0;
+    box-shadow: var(--shadow-sm);
+  }
+  .arch-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin: 12px 0;
+  }
+  .arch-node {
+    border-radius: var(--radius-sm);
+    padding: 12px 20px;
+    font-size: .85rem;
+    font-weight: 600;
+    text-align: center;
+    min-width: 140px;
+    border: 2px solid;
+  }
+  .node-source  { background: #dbeafe; border-color: #3b82f6; color: #1d4ed8; }
+  .node-hub     { background: #ede9fe; border-color: #8b5cf6; color: #5b21b6; }
+  .node-seq     { background: #fee2e2; border-color: #ef4444; color: #b91c1c; }
+  .node-par     { background: #dcfce7; border-color: #22c55e; color: #15803d; }
+  .node-worker  { background: #fef9c3; border-color: #eab308; color: #92400e; font-size:.78rem; min-width: 90px; }
+  .node-out-bad { background: #fee2e2; border-color: #ef4444; color: #b91c1c; }
+  .node-out-ok  { background: #dcfce7; border-color: #22c55e; color: #15803d; }
+  .arch-arrow {
+    font-size: 1.2rem;
+    color: var(--color-muted);
+    flex-shrink: 0;
+  }
+  .arch-arrow-down {
+    text-align: center;
+    font-size: 1.2rem;
+    color: var(--color-muted);
+    margin: 2px 0;
+  }
+  .arch-label {
+    font-size: .7rem;
+    font-weight: 600;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+    text-align: center;
+    margin: 0;
+  }
+  .flex-col { display:flex; flex-direction:column; align-items:center; gap:6px; }
 
-## 4. Instruksi Eksekusi 💻
+  /* ── PERFORMANCE TABLE ───────────────────────────── */
+  .perf-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    margin: 24px 0;
+    box-shadow: var(--shadow-sm);
+    font-size: .9rem;
+  }
+  .perf-table thead tr {
+    background: #0f172a;
+  }
+  .perf-table thead th {
+    color: #e2e8f0 !important;
+    font-weight: 600;
+    font-size: .8rem;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    padding: 14px 20px;
+    border: none !important;
+    text-align: left;
+  }
+  .perf-table tbody tr {
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    transition: background .15s;
+  }
+  .perf-table tbody tr:last-child { border-bottom: none; }
+  .perf-table tbody tr:hover { background: var(--color-bg); }
+  .perf-table td {
+    padding: 14px 20px;
+    color: var(--color-text) !important;
+    border: none !important;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    border-radius: 100px;
+    padding: 2px 10px;
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .02em;
+  }
+  .badge-green  { background:#dcfce7; color:#15803d; }
+  .badge-red    { background:#fee2e2; color:#b91c1c; }
+  .badge-blue   { background:#dbeafe; color:#1d4ed8; }
 
-Berikut ini adalah langkah-langkah untuk menjalankan simulasi:
+  /* ── CODE BLOCK ──────────────────────────────────── */
+  .code-window {
+    background: #0f172a;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    margin: 24px 0;
+    box-shadow: var(--shadow-md);
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    background: #1e293b;
+    border-bottom: 1px solid #334155;
+  }
+  .code-dots { display: flex; gap: 6px; }
+  .dot { width:12px; height:12px; border-radius:50%; }
+  .dot-r { background: #ef4444; }
+  .dot-y { background: #f59e0b; }
+  .dot-g { background: #22c55e; }
+  .code-filename {
+    color: #94a3b8 !important;
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: .78rem !important;
+    margin: 0 !important;
+  }
+  .code-body {
+    padding: 24px;
+    overflow-x: auto;
+  }
+  .code-body code, .code-body pre {
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: .85rem !important;
+    line-height: 1.7 !important;
+    color: #e2e8f0 !important;
+    background: transparent !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+  }
+  .code-line-comment { color: #64748b !important; }
+  .code-line-cmd     { color: #86efac !important; }
+  .code-line-output  { color: #7dd3fc !important; }
 
-1. Pastikan **Python 3.x** telah terinstall di sistem operasi Anda.
-2. Buka terminal atau *command prompt*, lalu navigasikan ke direktori repositori ini.
-3. Jalankan sintaks berikut:
-   
-   ```bash
-   python main.py
-   ```
-4. Hasil keluaran di terminal akan menampilkan perbandingan latensi antara inspeksi sekuensial dan paralel.
+  /* ── STEPS ───────────────────────────────────────── */
+  .steps-list {
+    list-style: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    counter-reset: step-counter;
+  }
+  .steps-list li {
+    counter-increment: step-counter;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .steps-list li:last-child { border-bottom: none; }
+  .step-num {
+    width: 32px; height: 32px;
+    background: var(--color-primary);
+    color: #fff !important;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .8rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .step-num::before { content: counter(step-counter); }
+  .steps-list li p { margin: 0 !important; font-size: .93rem !important; }
+  .steps-list li strong { display: block; margin-bottom: 4px; color: var(--color-heading) !important; }
+
+  /* ── INLINE CODE ─────────────────────────────────── */
+  code:not([class]) {
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: .82em !important;
+    background: #f1f5f9 !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 4px !important;
+    padding: 1px 6px !important;
+    color: #7c3aed !important;
+  }
+
+  /* ── DIVIDER ─────────────────────────────────────── */
+  .section-divider {
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--color-border), transparent);
+    margin: 40px 0;
+    border: none;
+  }
+
+  /* ── FOOTER NOTE ─────────────────────────────────── */
+  .page-footer-note {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 24px 32px;
+    margin-top: 48px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: var(--shadow-sm);
+  }
+  .page-footer-note p { margin: 0 !important; font-size: .88rem !important; color: var(--color-muted) !important; }
+  .page-footer-note strong { color: var(--color-heading) !important; }
+
+  @media (max-width: 640px) {
+    .hero-section { padding: 36px 24px; }
+    .card { padding: 20px; }
+    .arch-row { flex-direction: column; }
+    .toc-list { grid-template-columns: 1fr; }
+  }
+</style>
+
+<!-- ════════════════════════════════════════════════════════
+     HERO SECTION
+  ════════════════════════════════════════════════════════ -->
+<div class="hero-section">
+  <div class="hero-badge">🔬 Evaluasi Akhir &nbsp;·&nbsp; IFB 206 Komputasi Paralel</div>
+  <h1 class="hero-title">Parallel Network Traffic<br>Inspection Engine</h1>
+  <p class="hero-subtitle">
+    Demonstrasi implementasi <strong style="color:#bfdbfe">Python Multiprocessing</strong> untuk mempercepat inspeksi
+    batch <em>log</em> jaringan secara <em>real-time</em> — membandingkan pendekatan
+    <em>sequential</em> vs. <em>parallel</em> secara empiris.
+  </p>
+  <div class="hero-meta">
+    <div class="hero-meta-item">🏫 <span>Institusi</span> &nbsp;Institut Teknologi Nasional Bandung</div>
+    <div class="hero-meta-item">📚 <span>Mata Kuliah</span> &nbsp;IFB 206 Komputasi Paralel</div>
+    <div class="hero-meta-item">🐍 <span>Bahasa</span> &nbsp;Python 3.x &mdash; multiprocessing</div>
+    <div class="hero-meta-item">📅 <span>Tahun</span> &nbsp;2025 / 2026</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     TABLE OF CONTENTS
+  ════════════════════════════════════════════════════════ -->
+<div class="toc-card">
+  <p class="toc-title">📑 Daftar Isi</p>
+  <ul class="toc-list">
+    <li><a href="#latar-belakang"><span class="toc-num">1</span> Latar Belakang</a></li>
+    <li><a href="#arsitektur"><span class="toc-num">2</span> Desain Arsitektur Sistem</a></li>
+    <li><a href="#performa"><span class="toc-num">3</span> Analisis Performa</a></li>
+    <li><a href="#eksekusi"><span class="toc-num">4</span> Instruksi Eksekusi</a></li>
+  </ul>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     SECTION 1 — LATAR BELAKANG
+  ════════════════════════════════════════════════════════ -->
+<div class="section-anchor" id="latar-belakang">
+  <div class="section-icon icon-blue">🌐</div>
+  <div>
+    <span class="section-label">Bagian 01</span>
+    <h2 class="section-title-text">Latar Belakang</h2>
+  </div>
+</div>
+
+<div class="card">
+  <p>
+    Dalam manajemen jaringan dan telekomunikasi modern, proses pemindaian keamanan —
+    seperti <strong>vulnerability assessment</strong> dan <strong>packet sniffing</strong> —
+    kerap harus memproses jutaan baris <em>log traffic</em> setiap harinya. Volume data
+    tersebut menghasilkan tekanan komputasi yang sangat besar pada sistem.
+  </p>
+  <p>
+    Metode pemrosesan <em>sequential</em> konvensional — di mana satu <em>core</em>
+    memproses satu baris data dalam satu waktu — seringkali memicu <strong>bottleneck</strong>
+    yang signifikan, sehingga menunda deteksi anomali dan berpotensi membahayakan keamanan
+    jaringan secara keseluruhan.
+  </p>
+</div>
+
+<div class="callout callout-info">
+  <div style="font-size:1.6rem;line-height:1">💡</div>
+  <div class="callout-body">
+    <strong>Solusi yang Diusulkan</strong>
+    <p>
+      Proyek ini memanfaatkan modul <code>multiprocessing</code> bawaan Python untuk
+      mendistribusikan beban kerja inspeksi log ke seluruh <em>logical core</em> yang tersedia,
+      sehingga pemrosesan berlangsung secara <strong>konkuren dan paralel</strong> — bukan lagi
+      satu-per-satu.
+    </p>
+  </div>
+</div>
+
+<div class="card-grid">
+  <div class="stat-card">
+    <div class="stat-icon icon-blue">🏎️</div>
+    <div>
+      <p class="stat-value">N×</p>
+      <p class="stat-desc">Percepatan teoritis dengan <em>N</em> core paralel dibanding sequential</p>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon icon-green">📦</div>
+    <div>
+      <p class="stat-value">Batch</p>
+      <p class="stat-desc">Log diproses dalam kelompok parallel chunks, bukan baris per baris</p>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon icon-purple">⚡</div>
+    <div>
+      <p class="stat-value">Real-time</p>
+      <p class="stat-desc">Deteksi anomali jaringan yang lebih cepat dan responsif</p>
+    </div>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- ════════════════════════════════════════════════════════
+     SECTION 2 — ARSITEKTUR
+  ════════════════════════════════════════════════════════ -->
+<div class="section-anchor" id="arsitektur">
+  <div class="section-icon icon-purple">🏗️</div>
+  <div>
+    <span class="section-label">Bagian 02</span>
+    <h2 class="section-title-text">Desain Arsitektur Sistem</h2>
+  </div>
+</div>
+
+<div class="card">
+  <p>
+    Beban pemrosesan <em>log</em> didistribusikan secara merata ke seluruh <em>core logical</em>
+    yang tersedia pada mesin. Antrean data besar dipecah menjadi beberapa segmen, lalu setiap
+    segmen dieksekusi secara konkuren oleh <strong>Worker Process</strong> yang terpisah melalui
+    <code>multiprocessing.Pool</code>.
+  </p>
+</div>
+
+<!-- Architecture Diagram (Visual HTML-based, no Mermaid dependency) -->
+<div class="arch-diagram">
+  <p class="arch-label" style="margin-bottom:20px">Alur Sistem Inspeksi Paralel</p>
+
+  <!-- Source -->
+  <div class="arch-row">
+    <div class="arch-node node-source">📦 Dataset<br><small>Batch Log Jaringan</small></div>
+  </div>
+  <div class="arch-arrow-down">⬇️</div>
+
+  <!-- Hub -->
+  <div class="arch-row">
+    <div class="arch-node node-hub">🔀 Sistem Inspeksi<br><small>Dispatcher</small></div>
+  </div>
+  <div class="arch-arrow-down"></div>
+
+  <!-- Split -->
+  <div class="arch-row">
+    <div class="flex-col">
+      <div class="arch-node node-seq" style="min-width:200px">
+        ⚠️ <strong>Cara Lama: Sequential</strong><br>
+        <small>1 Core — baris per baris</small>
+      </div>
+      <div style="margin-top:6px">
+        <div class="arch-node node-out-bad" style="min-width:200px; padding:8px 16px">
+          😓 Deteksi Lambat / <em>Bottleneck</em>
+        </div>
+      </div>
+    </div>
+
+    <div style="font-size:2rem; color:#cbd5e1; align-self:center">⟷</div>
+
+    <div class="flex-col">
+      <div class="arch-node node-par" style="min-width:200px">
+        ✅ <strong>Cara Baru: Paralel</strong><br>
+        <small>Pool Multiprocessing</small>
+      </div>
+      <div class="arch-arrow-down">⬇️</div>
+      <div class="arch-row" style="gap:8px; margin:0">
+        <div class="arch-node node-worker">⚙️ Worker 1</div>
+        <div class="arch-node node-worker">⚙️ Worker 2</div>
+        <div class="arch-node node-worker">⚙️ Worker 3</div>
+      </div>
+      <div class="arch-arrow-down">⬇️</div>
+      <div class="arch-node node-hub" style="min-width:200px">🗂️ Agregasi Status</div>
+      <div class="arch-arrow-down">⬇️</div>
+      <div class="arch-node node-out-ok" style="min-width:200px; padding:8px 16px">
+        ⚡ Deteksi Real-time &amp; Cepat
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="callout callout-success">
+  <div style="font-size:1.6rem;line-height:1">✅</div>
+  <div class="callout-body">
+    <strong>Keunggulan Arsitektur Paralel</strong>
+    <p>
+      Setiap <em>Worker Process</em> berjalan independen di memori terpisah, memanfaatkan
+      <em>multiple CPU core</em> secara penuh — tidak terbatas oleh <em>Global Interpreter
+      Lock (GIL)</em> seperti halnya <code>threading</code>.
+    </p>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- ════════════════════════════════════════════════════════
+     SECTION 3 — PERFORMA
+  ════════════════════════════════════════════════════════ -->
+<div class="section-anchor" id="performa">
+  <div class="section-icon icon-green">⚡</div>
+  <div>
+    <span class="section-label">Bagian 03</span>
+    <h2 class="section-title-text">Analisis Performa</h2>
+  </div>
+</div>
+
+<div class="card">
+  <p>
+    Pengujian dilakukan dengan mensimulasikan inspeksi sejumlah batch <em>log</em> jaringan.
+    Setiap entri log dianalisis untuk mendeteksi indikator anomali keamanan. Hasil pengukuran
+    latensi dibandingkan antara pendekatan <strong>sequential</strong> dan <strong>paralel</strong>.
+  </p>
+</div>
+
+<table class="perf-table">
+  <thead>
+    <tr>
+      <th>Metrik</th>
+      <th>Sequential (1 Core)</th>
+      <th>Paralel (Multi-core)</th>
+      <th>Kesimpulan</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Jumlah Core</strong></td>
+      <td>1 Core</td>
+      <td>N Core (semua tersedia)</td>
+      <td><span class="badge badge-blue">Tergantung Mesin</span></td>
+    </tr>
+    <tr>
+      <td><strong>Strategi Pemrosesan</strong></td>
+      <td>Baris per baris (satu per satu)</td>
+      <td>Chunk paralel konkuren</td>
+      <td><span class="badge badge-green">✔ Paralel Lebih Efisien</span></td>
+    </tr>
+    <tr>
+      <td><strong>Latensi pada Data Besar</strong></td>
+      <td>Tinggi (linear terhadap N data)</td>
+      <td>Rendah (dibagi N core)</td>
+      <td><span class="badge badge-green">✔ Paralel Lebih Cepat</span></td>
+    </tr>
+    <tr>
+      <td><strong>Risiko Bottleneck</strong></td>
+      <td>Tinggi</td>
+      <td>Sangat Rendah</td>
+      <td><span class="badge badge-green">✔ Paralel Lebih Aman</span></td>
+    </tr>
+    <tr>
+      <td><strong>Skalabilitas</strong></td>
+      <td>Tidak skalabel</td>
+      <td>Linear terhadap jumlah core</td>
+      <td><span class="badge badge-green">✔ Paralel Lebih Baik</span></td>
+    </tr>
+    <tr>
+      <td><strong>Overhead</strong></td>
+      <td>Minimal</td>
+      <td>Ada (proses spawn)</td>
+      <td><span class="badge badge-red">⚠ Sequential Lebih Ringan</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout callout-warning">
+  <div style="font-size:1.6rem;line-height:1">⚠️</div>
+  <div class="callout-body">
+    <strong>Catatan Penting: Overhead vs. Speedup</strong>
+    <p>
+      Pendekatan paralel membawa <em>overhead</em> berupa waktu inisiasi proses (<em>spawn
+      time</em>). Untuk dataset kecil, overhead ini bisa membuat pemrosesan paralel justru
+      <strong>lebih lambat</strong>. Keunggulan paralel baru terlihat signifikan pada
+      <em>dataset besar</em> (ribuan hingga jutaan entri log).
+    </p>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- ════════════════════════════════════════════════════════
+     SECTION 4 — EKSEKUSI
+  ════════════════════════════════════════════════════════ -->
+<div class="section-anchor" id="eksekusi">
+  <div class="section-icon icon-orange">💻</div>
+  <div>
+    <span class="section-label">Bagian 04</span>
+    <h2 class="section-title-text">Instruksi Eksekusi</h2>
+  </div>
+</div>
+
+<div class="card">
+  <p>
+    Ikuti langkah-langkah berikut untuk menjalankan simulasi perbandingan performa
+    <em>sequential</em> vs. <em>paralel</em> secara lokal di mesin Anda.
+  </p>
+  <ul class="steps-list">
+    <li>
+      <div class="step-num"></div>
+      <div>
+        <strong>Pastikan Python 3.x Terinstall</strong>
+        <p>
+          Unduh dan pasang <strong>Python 3.8 atau lebih baru</strong> dari
+          <a href="https://python.org" target="_blank" rel="noopener">python.org</a>.
+          Modul <code>multiprocessing</code> sudah termasuk di <em>Python Standard Library</em>,
+          tidak perlu instalasi paket tambahan.
+        </p>
+      </div>
+    </li>
+    <li>
+      <div class="step-num"></div>
+      <div>
+        <strong>Clone atau Unduh Repositori</strong>
+        <p>
+          Buka terminal / <em>command prompt</em> lalu jalankan perintah berikut untuk
+          mengunduh kode sumber dari GitHub:
+        </p>
+      </div>
+    </li>
+    <li>
+      <div class="step-num"></div>
+      <div>
+        <strong>Navigasi ke Direktori Proyek</strong>
+        <p>
+          Masuk ke folder repositori yang sudah diunduh, pastikan file <code>main.py</code>
+          tersedia di direktori aktif Anda.
+        </p>
+      </div>
+    </li>
+    <li>
+      <div class="step-num"></div>
+      <div>
+        <strong>Jalankan Simulasi</strong>
+        <p>
+          Eksekusi skrip utama dengan perintah di bawah. Program akan secara otomatis menjalankan
+          kedua pendekatan dan menampilkan perbandingan latensi di terminal:
+        </p>
+      </div>
+    </li>
+  </ul>
+</div>
+
+<!-- Code Window -->
+<div class="code-window">
+  <div class="code-header">
+    <div class="code-dots">
+      <div class="dot dot-r"></div>
+      <div class="dot dot-y"></div>
+      <div class="dot dot-g"></div>
+    </div>
+    <p class="code-filename">Terminal &nbsp;—&nbsp; bash / cmd / powershell</p>
+  </div>
+  <div class="code-body">
+    <pre><code><span class="code-line-comment"># 1. Clone repositori</span>
+<span class="code-line-cmd">git clone https://github.com/Lifyhzz/Lifyhzz-Parrallel-Network-InspectionV3.git</span>
+<span class="code-line-cmd">cd Lifyhzz-Parrallel-Network-InspectionV3</span>
+
+<span class="code-line-comment"># 2. Jalankan simulasi</span>
+<span class="code-line-cmd">python main.py</span>
+
+<span class="code-line-comment"># --- Contoh Output ---</span>
+<span class="code-line-output">✔ [Sequential] Waktu pemrosesan : 4.732 detik</span>
+<span class="code-line-output">✔ [Parallel  ] Waktu pemrosesan : 1.201 detik</span>
+<span class="code-line-output">🚀 Speedup Paralel               : ~3.94×</span></code></pre>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     FOOTER NOTE
+  ════════════════════════════════════════════════════════ -->
+<div class="page-footer-note">
+  <div style="font-size:2rem;line-height:1">📄</div>
+  <div>
+    <p>
+      <strong>Parallel Network Traffic Inspection Engine</strong> &mdash;
+      Proyek Evaluasi Akhir &nbsp;|&nbsp; IFB 206 Komputasi Paralel &nbsp;|&nbsp;
+      Institut Teknologi Nasional Bandung &nbsp;|&nbsp; 2025&thinsp;/&thinsp;2026
+    </p>
+    <p style="margin-top:4px !important">
+      Implementasi menggunakan <code>multiprocessing.Pool</code> bawaan Python —
+      tidak memerlukan library pihak ketiga.
+    </p>
+  </div>
+</div>

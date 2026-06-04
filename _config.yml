@@ -1,16 +1,31 @@
-title: Network Inspection Engine
-description: Implementasi Multiprocessing pada Analisis Keamanan Jaringan
+title: "Parallel Network Traffic Inspection Engine"
+description: "Implementasi Multiprocessing pada Analisis Keamanan Jaringan — IFB 206 Komputasi Paralel"
 remote_theme: just-the-docs/just-the-docs
 
-# Konfigurasi warna
-color_scheme: dark
+# Tema Cerah
+color_scheme: light
 
-# Mengaktifkan fitur pencarian (Search bar)
+# Logo / Favicon
+# logo: ""
+
+# Footer
+footer_content: "Dibuat untuk <strong>IFB 206 Komputasi Paralel</strong> &mdash; Institut Teknologi Nasional Bandung"
+
+# Pencarian
 search_enabled: true
 search:
   tokenizer_separator: /[\s\-/]+/
 
 # Teks UI
 ui_text:
-  search_placeholder_text: "Search documentation..."
+  search_placeholder_text: "Cari dokumentasi..."
+  search_documenter_results_found: "{count} hasil ditemukan"
+  search_no_results_text: "Tidak ada hasil ditemukan"
+  back_to_top: "Kembali ke atas"
 
+# Konfigurasi Heading Anchors
+heading_anchors: true
+
+# Custom CSS untuk override styling
+sass:
+  style: compressed
