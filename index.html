@@ -991,22 +991,46 @@
     background: #cbd5e1;
     border-radius: 2px;
   }
-  .batch-item {
+  .batch-card {
     background: #ffffff;
     border: 1px solid var(--color-border);
     color: var(--color-text);
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-family: 'Inter', sans-serif;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-family: 'Outfit', sans-serif;
     font-size: .75rem;
-    font-weight: 500;
+    font-weight: 600;
     white-space: nowrap;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 90px;
   }
-  .batch-item.anomaly {
+  .batch-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px -5px rgba(30, 58, 138, 0.1);
+    border-color: var(--color-primary-light);
+  }
+  .batch-card .badge-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    background: #eff6ff;
+    color: var(--color-primary);
+    border-radius: 6px;
+  }
+  .batch-card.anomaly {
     background: #fef2f2;
     border-color: #fca5a5;
     color: #991b1b;
+  }
+  .batch-card.anomaly .badge-icon {
+    background: #fee2e2;
+    color: #ef4444;
   }
 
   /* Core grid visualization */
@@ -2333,9 +2357,9 @@
         <div class="sim-group">
           <label class="sim-label">
             <span>Jumlah Batch Grafik</span>
-            <span class="sim-val-display" id="sim-batch-val">5</span>
+            <span class="sim-val-display" id="sim-batch-val">20</span>
           </label>
-          <input type="range" min="2" max="50" value="5" step="1" class="sim-range" id="sim-batch-slider">
+          <input type="range" min="2" max="50" value="20" step="1" class="sim-range" id="sim-batch-slider">
         </div>
 
         <div class="sim-group">
@@ -2361,10 +2385,7 @@
       </div>
 
       <div class="sim-actions">
-        <button type="button" class="sim-action-btn btn-run-par" id="btn-start-sim" style="background: linear-gradient(135deg, #1e3a8a, #2563eb); margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.2);">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px;"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.5-1 1-4c2 1 2 1 4 4z"></path><path d="M12 15v5s1-.5 4-1c-1-2-1-2-4-4z"></path></svg>
-          Mulai Simulasi Real-time
-        </button>
+
         <button type="button" class="sim-action-btn btn-run-seq" id="btn-run-seq">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
           Jalankan Sequential
@@ -2679,7 +2700,7 @@
 <script>
   (function() {
     // State Variables
-    let totalBatches = 5;
+    let totalBatches = 20;
     let selectedCores = 8;
     let baseDelayMs = 150;
     let isSimulating = false;
@@ -2740,23 +2761,7 @@
 
       btnSeq.addEventListener('click', runSequential);
       btnPar.addEventListener('click', runParallel);
-      btnStartSim.addEventListener('click', async () => {
-        resetSimulation();
-        
-        // Optimize for real-time visual feel
-        totalBatches = 20; 
-        batchSlider.value = 20;
-        batchVal.textContent = 20;
-        baseDelayMs = 40;
-        delaySlider.value = 40;
-        delayVal.textContent = '40ms';
-        
-        if (window.initChart) window.initChart();
-        
-        // Run parallel with real-time flag
-        window.isRealTimeMode = true;
-        runParallel().then(() => { window.isRealTimeMode = false; });
-      });
+
       btnReset.addEventListener('click', () => {
         resetSimulation();
         if (window.initChart) window.initChart();
@@ -2805,14 +2810,20 @@
       queueDisplay.innerHTML = '';
       for (let i = 1; i <= totalBatches; i++) {
         const p = document.createElement('div');
-        p.className = 'packet';
+        p.className = 'batch-card';
         p.id = `packet-${i}`;
-        p.textContent = `Batch #${i}`;
-        // 10% chance of being simulated anomaly visuals
-        if (Math.random() < 0.1) {
-          p.classList.add('anomaly');
-          p.textContent = `Batch #${i} ⚠`;
-        }
+        
+        let isAnomaly = Math.random() < 0.1;
+        let iconHtml = isAnomaly ? 
+          `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>` : 
+          `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+        
+        if(isAnomaly) p.classList.add('anomaly');
+        
+        p.innerHTML = `
+          <div class="badge-icon">${iconHtml}</div>
+          <div>Batch #${i}</div>
+        `;
         queueDisplay.appendChild(p);
       }
       queueCount.textContent = `${totalBatches} batch tersisa`;
