@@ -1,105 +1,95 @@
-import time
-import multiprocessing
 import random
-import sys
+import time
+import matplotlib.pyplot as plt
+import numpy as np
+from multiprocessing import Pool
 
-# Simulasi inspeksi keamanan pada paket/log jaringan
-def inspeksi_log_jaringan(batch_id):
-    # Simulasi beban komputasi (misal: dekripsi paket atau regex matching)
-    beban = 1500
-    _ = sum(i * j for i in range(beban) for j in range(beban))
-    time.sleep(random.uniform(0.1, 0.2)) # Simulasi delay I/O pembacaan log
-    
-    # Simulasi hasil deteksi (90% Aman, 10% Anomali)
-    status = random.choices(["✓ Aman", "⚠ Anomali/Serangan"], weights=[0.9, 0.1])[0]
-    return (batch_id, status)
-
-def print_box(text, char="="):
-    """Print text dalam box"""
-    width = max(len(line) for line in text.split('\n'))
-    print(char * (width + 4))
-    for line in text.split('\n'):
-        print(f"{char} {line.ljust(width)} {char}")
-    print(char * (width + 4))
-
-def print_header(title):
-    """Print section header"""
-    width = 60
-    print(f"\n{'='*width}")
-    print(f"  {title}")
-    print(f"{'='*width}")
+# =========================================================================
+# BLOK PEMROSESAN SINYAL (Digital Signal Processing)
+# Fungsi ini dijalankan secara paralel di berbagai core CPU
+# =========================================================================
+def check_anomaly(data_pair):
+    """
+    Fungsi worker untuk mengecek apakah satu titik data adalah anomali.
+    Menerima tuple (indeks, volume).
+    """
+    index, volume = data_pair
+    # Kriteria Anomali: Di bawah 100mL (Sesak) atau di atas 1500mL (Abnormal)
+    if volume < 100 or volume > 1500:
+        return index
+    return None
 
 if __name__ == '__main__':
-    # Simulasi 50 batch log lalu lintas jaringan
-    dataset_log = list(range(1, 51))
+    print("==========================================================")
+    print("🏥 RESPIRATORY INSPECTION SYSTEM - SPIROMETRY TRIAL")
+    print("   ITENAS - IFB 206 Komputasi Paralel")
+    print("   Uji Coba Distribusi Volume Pernapasan (Paralel)")
+    print("==========================================================\n")
 
-    print("\n" + "█" * 70)
-    print("█  🔒 Parallel Network Traffic Inspection Engine".ljust(69) + "█")
-    print("█  Implementasi Python Multiprocessing untuk Inspeksi Log Jaringan".ljust(69) + "█")
-    print("█" * 70)
+    # 1. GENERASI DATA (1000 Observasi)
+    print("📊 Menggenerasi 1000 titik data observasi pernapasan...")
+    respiratory_data = [random.randint(400, 600) for _ in range(1000)]
     
-    print(f"\n  📊 Total batch log yang akan dianalisis: {len(dataset_log)} batch")
-    print()
+    # 2. PENYUNTIKAN ANOMALI (Sesuai Spesifikasi Bagian 03)
+    respiratory_data[250] = 50   # Indeks 250: Napas pendek ekstrim
+    respiratory_data[880] = 1800 # Indeks 880: Puncak abnormal 
 
-    # ---------------------------------------------------------
-    # 1. METODE SEKUENSIAL (Lambat)
-    # ---------------------------------------------------------
-    print_header("[1] INSPEKSI SEKUENSIAL (1 CPU Core)")
-    print(f"  ⏳ Memulai pemrosesan sequentially...\n")
+    # 3. DETEKSI ANOMALI PARALEL (Menggunakan Pool)
+    print("🔍 Menjalankan deteksi anomali pada Cluster Core...")
+    start_time = time.time()
     
-    start_serial = time.time()
-    results_serial = []
-    for i, batch in enumerate(dataset_log):
-        result = inspeksi_log_jaringan(batch)
-        results_serial.append(result)
-        # Tampilkan progress setiap 10 batch
-        if (i + 1) % 10 == 0:
-            print(f"  ✓ Selesai {i + 1}/{len(dataset_log)} batch diproses")
+    # Menyiapkan pasangan (indeks, data) untuk diproses
+    data_pairs = list(enumerate(respiratory_data))
     
-    waktu_serial = time.time() - start_serial
-    print(f"\n  ⏱️  Waktu Eksekusi Sekuensial: {waktu_serial:.4f} detik")
-    print(f"     ({waktu_serial/len(dataset_log):.4f} detik per batch)\n")
+    # Menggunakan Pool untuk membagi tugas ke semua CPU Core
+    with Pool() as pool:
+        results = pool.map(check_anomaly, data_pairs)
+    
+    # Menyaring hasil (hanya indeks yang tidak None)
+    anomalies_detected = [res for res in results if res is not None]
+    
+    end_time = time.time()
+    print(f"✅ Analisis Selesai dalam {end_time - start_time:.4f} detik.")
+    print(f"⚠️ Ditemukan {len(anomalies_detected)} anomali pada indeks: {anomalies_detected}\n")
 
-    # ---------------------------------------------------------
-    # 2. METODE PARALEL (Cepat)
-    # ---------------------------------------------------------
-    cpu_cores = multiprocessing.cpu_count()
-    print_header(f"[2] INSPEKSI PARALEL ({cpu_cores} CPU Cores)")
-    print(f"  ⚡ Memulai pemrosesan dengan {cpu_cores} CPU cores...\n")
+    # 4. VISUALISASI GRAFIK SPIROMETRI (Matplotlib)
+    print("📈 Menyiapkan potret visualisasi grafik...")
     
-    start_parallel = time.time()
+    data_points = np.array(respiratory_data)
+    plt.figure(figsize=(14, 7), facecolor='#f8fafc')
     
-    with multiprocessing.Pool(processes=cpu_cores) as pool:
-        results_parallel = pool.map(inspeksi_log_jaringan, dataset_log)
-        
-    waktu_parallel = time.time() - start_parallel
-    print(f"  ✓ Semua batch selesai diproses!")
-    print(f"\n  ⏱️  Waktu Eksekusi Paralel: {waktu_parallel:.4f} detik")
-    print(f"     ({waktu_parallel/len(dataset_log):.4f} detik per batch)\n")
+    # Plot utama
+    plt.plot(data_points, color='#0891b2', linewidth=1, alpha=0.7, label='Volume Tidal (mL)')
+    
+    # Batas Normal
+    plt.axhspan(400, 600, color='#16a34a', alpha=0.1, label='Rentang Normal (400-600 mL)')
+    
+    # Markah Anomali (Merah)
+    plt.scatter(anomalies_detected, data_points[anomalies_detected], 
+                color='#dc2626', s=80, edgecolors='white', linewidth=1.5, 
+                zorder=5, label='Anomali Terdeteksi')
 
-    # ---------------------------------------------------------
-    # 3. KESIMPULAN PERFORMA
-    # ---------------------------------------------------------
-    print_header("📈 HASIL ANALISIS PERFORMA")
+    # Anotasi Spesifik (Bagian 03)
+    plt.annotate('Napas Pendek Ekstrim (Indeks 250)', xy=(250, 50), xytext=(100, 250),
+                 arrowprops=dict(facecolor='#334155', shrink=0.08, width=1, headwidth=6),
+                 fontsize=9, fontweight='bold', color='#dc2626')
     
-    speedup = waktu_serial / waktu_parallel
-    efficiency = (speedup / cpu_cores) * 100
+    plt.annotate('Puncak Abnormal (Indeks 880)', xy=(880, 1800), xytext=(700, 1600),
+                 arrowprops=dict(facecolor='#334155', shrink=0.08, width=1, headwidth=6),
+                 fontsize=9, fontweight='bold', color='#dc2626')
+
+    # Font & Styling
+    plt.title('Grafik Uji Coba Spirometri - Simulasi Inspeksi Pernapasan', 
+              fontsize=15, fontweight='800', pad=20, color='#0f172a')
+    plt.xlabel('Indeks Observasi', fontsize=11, color='#64748b')
+    plt.ylabel('Volume (mL)', fontsize=11, color='#64748b')
+    plt.grid(True, linestyle='--', alpha=0.3)
+    plt.legend(loc='upper right', frameon=True)
     
-    print(f"\n  Kecepatan Sequential:  {waktu_serial:.4f} detik")
-    print(f"  Kecepatan Parallel:    {waktu_parallel:.4f} detik")
-    print(f"  {'─' * 50}")
-    print(f"  ⚡ SPEEDUP: {speedup:.2f}x lebih cepat!")
-    print(f"  📊 EFFICIENCY: {efficiency:.1f}% (terhadap CPU cores)")
+    plt.tight_layout()
+    plt.show()
     
-    # Visualisasi bar chart sederhana
-    print(f"\n  Perbandingan Waktu Eksekusi:")
-    bar_length = 40
-    serial_bar = int((waktu_serial / max(waktu_serial, waktu_parallel)) * bar_length)
-    parallel_bar = int((waktu_parallel / max(waktu_serial, waktu_parallel)) * bar_length)
-    
-    print(f"  Sequential: [{'█' * serial_bar}{'─' * (bar_length - serial_bar)}] {waktu_serial:.4f}s")
-    print(f"  Parallel:   [{'█' * parallel_bar}{'─' * (bar_length - parallel_bar)}] {waktu_parallel:.4f}s")
-    
-    print("\n" + "█" * 70)
-    print("█ ✅ Analisis selesai!".ljust(69) + "█")
-    print("█" * 70 + "\n")
+    print("==========================================================")
+    print("Sistem Inspeksi Selesai: Semua anomali telah tertandai.")
+    print("==========================================================")
+
