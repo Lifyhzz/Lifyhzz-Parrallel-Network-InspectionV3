@@ -1,43 +1,40 @@
----
-layout: default
-title: Beranda
-nav_order: 1
-description: "Dokumentasi Parallel Network Traffic Inspection Engine — Implementasi Python Multiprocessing untuk Inspeksi Log Jaringan."
----
-
 <style>
-  /* =====================================================
-     CUSTOM ARTICLE THEME — LIGHT & CLEAN
-     ===================================================== */
-
   /* Import Google Fonts */
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
 
   :root {
-    --color-primary:    #2563eb;
-    --color-primary-light: #eff6ff;
-    --color-secondary:  #0ea5e9;
-    --color-accent:     #7c3aed;
-    --color-success:    #16a34a;
-    --color-warning:    #d97706;
-    --color-danger:     #dc2626;
-    --color-surface:    #ffffff;
-    --color-bg:         #f8fafc;
-    --color-border:     #e2e8f0;
-    --color-text:       #1e293b;
-    --color-muted:      #64748b;
-    --color-heading:    #0f172a;
-    --radius-sm:        6px;
-    --radius-md:        12px;
-    --radius-lg:        20px;
-    --shadow-sm:        0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
-    --shadow-md:        0 4px 16px rgba(0,0,0,.08), 0 2px 8px rgba(0,0,0,.04);
-    --shadow-lg:        0 10px 40px rgba(0,0,0,.10), 0 4px 16px rgba(0,0,0,.06);
+    --color-primary: #2563eb;
+    --color-primary-light: rgba(37, 99, 235, 0.05);
+    --color-secondary: #0ea5e9;
+    --color-accent: #7c3aed;
+    --color-success: #16a34a;
+    --color-warning: #ea580c;
+    --color-danger: #dc2626;
+    --color-surface: #ffffff;
+    --color-surface-card: #ffffff;
+    --color-bg: #f8fafc;
+    --color-border: #e2e8f0;
+    --color-text: #334155;
+    --color-muted: #64748b;
+    --color-heading: #0f172a;
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 24px;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
   }
 
-  /* Base reset */
+  /* Base Reset & Background Grid */
   body, .main-content {
-    background: var(--color-bg) !important;
+    background-color: var(--color-bg) !important;
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.02) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(124, 58, 237, 0.02) 0px, transparent 50%),
+      linear-gradient(rgba(15, 23, 42, 0.002) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(15, 23, 42, 0.002) 1px, transparent 1px) !important;
+    background-size: 100% 100%, 100% 100%, 30px 30px, 30px 30px !important;
+    background-attachment: fixed !important;
     font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
     color: var(--color-text) !important;
     line-height: 1.75 !important;
@@ -45,7 +42,7 @@ description: "Dokumentasi Parallel Network Traffic Inspection Engine — Impleme
 
   .main-content h1, .main-content h2,
   .main-content h3, .main-content h4 {
-    font-family: 'Inter', sans-serif !important;
+    font-family: 'Outfit', sans-serif !important;
     color: var(--color-heading) !important;
     font-weight: 700 !important;
     letter-spacing: -0.02em;
@@ -56,158 +53,271 @@ description: "Dokumentasi Parallel Network Traffic Inspection Engine — Impleme
     font-size: 1rem;
   }
 
+  /* Override just-the-docs default spacing to make it 1cm (approx 12px) */
+  .main {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  .main-content-wrap {
+    padding: 0 !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+  .main-content {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  .breadcrumb-nav {
+    display: none !important;
+  }
+
+  /* Page wrapper - balanced full screen */
+  .page-wrapper {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto !important;
+    padding: 0 24px 48px 24px !important;
+    box-sizing: border-box;
+    min-height: 100vh;
+  }
+
   /* ── HERO ────────────────────────────────────────── */
   .hero-section {
-    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #1d4ed8 100%);
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 50%, #bfdbfe 100%);
+    border: 1px solid rgba(37, 99, 235, 0.15);
     border-radius: var(--radius-lg);
-    padding: 56px 48px;
-    margin-bottom: 40px;
+    padding: 48px 40px 40px;
+    margin-bottom: 32px;
     position: relative;
     overflow: hidden;
+    box-shadow: var(--shadow-sm);
   }
-  .hero-section::before {
+  .hero-section::after {
     content: '';
     position: absolute;
-    inset: 0;
-    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='28'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+    top: -50%; left: -50%; width: 200%; height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, transparent 60%);
     pointer-events: none;
   }
   .hero-badge {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background: rgba(255,255,255,.12);
-    border: 1px solid rgba(255,255,255,.2);
-    color: #bfdbfe;
+    background: rgba(37, 99, 235, 0.1);
+    border: 1px solid rgba(37, 99, 235, 0.2);
+    color: #1d4ed8;
     border-radius: 100px;
-    padding: 4px 14px;
-    font-size: .78rem;
+    padding: 8px 20px;
+    font-size: .85rem;
     font-weight: 600;
     letter-spacing: .04em;
     text-transform: uppercase;
-    margin-bottom: 20px;
+    margin-bottom: 24px;
   }
   .hero-title {
-    font-size: clamp(1.8rem, 4vw, 2.8rem) !important;
+    font-size: clamp(2.2rem, 5.2vw, 3.6rem) !important;
     font-weight: 800 !important;
-    color: #ffffff !important;
     line-height: 1.2 !important;
-    margin: 0 0 16px !important;
+    margin: 0 0 22px !important;
     letter-spacing: -0.03em;
+    background: linear-gradient(to right, #1e3a8a, #2563eb);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
   .hero-subtitle {
-    color: #93c5fd !important;
-    font-size: 1.05rem !important;
-    margin: 0 0 32px !important;
+    color: #334155 !important;
+    font-size: 1.1rem !important;
+    margin: 0 0 28px !important;
     font-weight: 400 !important;
-    max-width: 600px;
+    max-width: 720px;
+    line-height: 1.7;
   }
+
+  .hero-members-card {
+    margin: 20px 0 28px;
+    padding: 20px 24px;
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(37, 99, 235, 0.12);
+    border-radius: var(--radius-md);
+  }
+  .hero-members-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  /* Hero Metadata Layout */
   .hero-meta {
     display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 28px;
+  }
+  .hero-meta-left {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .hero-meta-label {
+    font-size: .78rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-bottom: 4px;
+  }
+  .hero-member-name {
+    font-size: .95rem;
+    font-weight: 600;
+    color: var(--color-heading);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .hero-member-name::before {
+    content: "👤";
+    font-size: .85rem;
+    opacity: 0.8;
   }
   .hero-meta-item {
     display: flex;
     align-items: center;
     gap: 8px;
-    background: rgba(255,255,255,.1);
-    border: 1px solid rgba(255,255,255,.15);
-    border-radius: var(--radius-sm);
-    padding: 8px 16px;
-    color: #e0f2fe !important;
-    font-size: .88rem;
+    color: var(--color-text) !important;
+    font-size: .9rem;
     font-weight: 500;
-    text-decoration: none !important;
   }
-  .hero-meta-item span { font-weight: 300; opacity: .7; }
+  .hero-meta-item span {
+    font-weight: 700;
+    color: var(--color-heading);
+  }
 
-  /* ── TABLE OF CONTENTS ───────────────────────────── */
-  .toc-card {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-left: 4px solid var(--color-primary);
-    border-radius: var(--radius-md);
-    padding: 28px 32px;
-    margin-bottom: 40px;
-    box-shadow: var(--shadow-sm);
+  /* ── NAVBAR (FULL-WIDTH STICKY TOP) ── */
+  .navbar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--color-border);
+    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06);
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0 24px;
   }
-  .toc-title {
-    font-size: .72rem !important;
-    font-weight: 700 !important;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    color: var(--color-primary) !important;
-    margin: 0 0 14px !important;
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    max-width: 1400px;
+    margin: 0 auto;
+    height: 58px;
   }
-  .toc-list {
+  .nav-brand {
+    font-family: 'Outfit', sans-serif;
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--color-heading) !important;
+    text-decoration: none !important;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .nav-brand span {
+    color: var(--color-primary);
+  }
+  .nav-list {
     list-style: none !important;
     margin: 0 !important;
     padding: 0 !important;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 8px;
-  }
-  .toc-list li {
-    margin: 0 !important;
-  }
-  .toc-list a {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 14px;
-    border-radius: var(--radius-sm);
-    background: var(--color-bg);
-    border: 1px solid var(--color-border);
-    color: var(--color-primary) !important;
-    font-size: .9rem;
-    font-weight: 500;
-    text-decoration: none !important;
-    transition: all .2s ease;
+    justify-content: center;
+    gap: 8px;
+    flex: 1;
+    flex-wrap: wrap;
   }
-  .toc-list a:hover {
-    background: var(--color-primary-light);
-    border-color: var(--color-primary);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-sm);
+  .nav-list li {
+    margin: 0 !important;
   }
-  .toc-num {
-    width: 24px; height: 24px;
-    border-radius: 50%;
-    background: var(--color-primary);
-    color: white !important;
-    font-size: .7rem;
-    font-weight: 700;
+  .nav-list a {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
+    gap: 6px;
+    color: var(--color-text) !important;
+    font-size: .9rem;
+    font-weight: 600;
+    text-decoration: none !important;
+    padding: 10px 28px;
+    border-radius: 100px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid transparent;
+    white-space: nowrap;
+  }
+  .nav-list a:hover {
+    background: rgba(37, 99, 235, 0.08);
+    color: var(--color-primary) !important;
+    border-color: rgba(37, 99, 235, 0.15);
+  }
+  .nav-list a.active {
+    background: var(--color-primary);
+    color: #ffffff !important;
+    border-color: var(--color-primary);
+  }
+  @media (max-width: 768px) {
+    .navbar { padding: 0 16px; }
+    .nav-inner {
+      flex-direction: column;
+      height: auto;
+      padding: 12px 0;
+      gap: 10px;
+    }
+    .nav-brand { font-size: .85rem; }
+    .nav-list {
+      gap: 4px;
+      overflow-x: auto;
+      justify-content: flex-start;
+      width: 100%;
+      padding-bottom: 4px;
+    }
+    .nav-list a {
+      font-size: .78rem;
+      padding: 8px 16px;
+    }
   }
 
   /* ── SECTION HEADERS ─────────────────────────────── */
   .section-anchor {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin: 48px 0 20px !important;
-    padding-bottom: 12px;
-    border-bottom: 2px solid var(--color-border);
+    gap: 16px;
+    margin: 40px 0 20px !important;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--color-border);
+    scroll-margin-top: 72px;
   }
   .section-icon {
-    width: 40px; height: 40px;
+    width: 36px; height: 36px;
     border-radius: var(--radius-sm);
     display: flex; align-items: center; justify-content: center;
     font-size: 1.1rem;
     flex-shrink: 0;
+    box-shadow: var(--shadow-sm);
   }
-  .icon-blue   { background: #dbeafe; }
-  .icon-purple { background: #ede9fe; }
-  .icon-green  { background: #dcfce7; }
-  .icon-orange { background: #ffedd5; }
+  .icon-blue   { background: rgba(37, 99, 235, 0.08); border: 1px solid rgba(37, 99, 235, 0.15); color: var(--color-primary); }
+  .icon-purple { background: rgba(124, 58, 237, 0.08); border: 1px solid rgba(124, 58, 237, 0.15); color: var(--color-accent); }
+  .icon-green  { background: rgba(22, 163, 74, 0.08); border: 1px solid rgba(22, 163, 74, 0.15); color: var(--color-success); }
+  .icon-orange { background: rgba(234, 88, 12, 0.08); border: 1px solid rgba(234, 88, 12, 0.15); color: var(--color-warning); }
   .section-label {
-    font-size: .68rem !important;
+    font-size: .7rem !important;
     font-weight: 700;
-    letter-spacing: .1em;
+    letter-spacing: .12em;
     text-transform: uppercase;
     color: var(--color-primary) !important;
     display: block;
@@ -222,49 +332,64 @@ description: "Dokumentasi Parallel Network Traffic Inspection Engine — Impleme
   }
 
   /* ── CONTENT CARDS ───────────────────────────────── */
-  .card {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    padding: 28px 32px;
-    margin-bottom: 20px;
-    box-shadow: var(--shadow-sm);
-    transition: box-shadow .2s ease;
+  .card, .toc-card, .arch-diagram, .page-footer-note {
+    background: var(--color-surface-card) !important;
+    border: 1px solid var(--color-border) !important;
+    border-radius: var(--radius-md) !important;
+    box-shadow: var(--shadow-sm) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
   }
-  .card:hover { box-shadow: var(--shadow-md); }
+  .card:hover {
+    border-color: rgba(37, 99, 235, 0.2) !important;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md) !important;
+  }
+  .card {
+    padding: 24px 32px;
+    margin-bottom: 24px;
+  }
+  .card > p:first-of-type { margin-top: 0; }
+  .card > p:last-of-type { margin-bottom: 0; }
 
   .card-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: 16px;
     margin-bottom: 24px;
   }
   .stat-card {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    padding: 20px 24px;
-    box-shadow: var(--shadow-sm);
     display: flex;
     align-items: flex-start;
     gap: 16px;
+    padding: 20px 24px;
+    background: var(--color-surface-card) !important;
+    border: 1px solid var(--color-border) !important;
+    border-radius: var(--radius-md) !important;
+    box-shadow: var(--shadow-sm) !important;
+    transition: all 0.25s ease !important;
+  }
+  .stat-card:hover {
+    border-color: rgba(37, 99, 235, 0.2) !important;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md) !important;
   }
   .stat-icon {
-    width: 44px; height: 44px;
+    width: 40px; height: 40px;
     border-radius: var(--radius-sm);
     display: flex; align-items: center; justify-content: center;
-    font-size: 1.2rem;
+    font-size: 1.15rem;
     flex-shrink: 0;
   }
   .stat-value {
     font-size: 1.6rem !important;
     font-weight: 800 !important;
-    line-height: 1 !important;
+    line-height: 1.1 !important;
     margin: 0 0 4px !important;
     color: var(--color-heading) !important;
+    font-family: 'Outfit', sans-serif;
   }
   .stat-desc {
-    font-size: .82rem !important;
+    font-size: .8rem !important;
     color: var(--color-muted) !important;
     margin: 0 !important;
     line-height: 1.4;
@@ -276,67 +401,128 @@ description: "Dokumentasi Parallel Network Traffic Inspection Engine — Impleme
     gap: 16px;
     padding: 20px 24px;
     border-radius: var(--radius-md);
-    margin: 24px 0;
-    border: 1px solid;
+    margin: 20px 0;
+    border: 1px solid transparent;
   }
-  .callout-info    { background: #eff6ff; border-color: #bfdbfe; }
-  .callout-success { background: #f0fdf4; border-color: #bbf7d0; }
-  .callout-warning { background: #fffbeb; border-color: #fde68a; }
-  .callout-body p { margin: 0 !important; font-size: .92rem !important; }
-  .callout-body strong { display: block; margin-bottom: 6px; font-size: .85rem; }
+  .callout-info    { background: rgba(37, 99, 235, 0.05); border-color: rgba(37, 99, 235, 0.15); }
+  .callout-success { background: rgba(22, 163, 74, 0.05); border-color: rgba(22, 163, 74, 0.15); }
+  .callout-warning { background: rgba(234, 88, 12, 0.05); border-color: rgba(234, 88, 12, 0.15); }
+  .callout-body p { margin: 0 !important; font-size: .95rem !important; color: var(--color-text) !important; }
+  .callout-body strong { display: block; margin-bottom: 4px; font-size: .95rem; color: var(--color-heading); }
 
-  /* ── ARCHITECTURE DIAGRAM ────────────────────────── */
-  .arch-diagram {
-    background: var(--color-surface);
+  /* ── SYSTEM ARCHITECTURE DIAGRAM ── */
+  .arch-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    margin: 20px 0;
+  }
+  @media (min-width: 768px) {
+    .arch-container {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .arch-column {
+    background: #ffffff;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
-    padding: 32px;
-    margin: 24px 0;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
     box-shadow: var(--shadow-sm);
   }
-  .arch-row {
+  .arch-column-title {
+    font-size: .9rem !important;
+    font-weight: 700 !important;
+    color: var(--color-heading) !important;
+    margin-bottom: 14px !important;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 16px;
-    flex-wrap: wrap;
-    margin: 12px 0;
+    gap: 6px;
   }
-  .arch-node {
+  .arch-flow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 10px;
+  }
+  .arch-box {
+    width: 90%;
+    max-width: 240px;
+    padding: 10px;
     border-radius: var(--radius-sm);
-    padding: 12px 20px;
-    font-size: .85rem;
+    text-align: center;
+    font-size: .78rem;
     font-weight: 600;
-    text-align: center;
-    min-width: 140px;
-    border: 2px solid;
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s;
   }
-  .node-source  { background: #dbeafe; border-color: #3b82f6; color: #1d4ed8; }
-  .node-hub     { background: #ede9fe; border-color: #8b5cf6; color: #5b21b6; }
-  .node-seq     { background: #fee2e2; border-color: #ef4444; color: #b91c1c; }
-  .node-par     { background: #dcfce7; border-color: #22c55e; color: #15803d; }
-  .node-worker  { background: #fef9c3; border-color: #eab308; color: #92400e; font-size:.78rem; min-width: 90px; }
-  .node-out-bad { background: #fee2e2; border-color: #ef4444; color: #b91c1c; }
-  .node-out-ok  { background: #dcfce7; border-color: #22c55e; color: #15803d; }
-  .arch-arrow {
-    font-size: 1.2rem;
-    color: var(--color-muted);
-    flex-shrink: 0;
+  .arch-box:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
   }
-  .arch-arrow-down {
-    text-align: center;
-    font-size: 1.2rem;
-    color: var(--color-muted);
-    margin: 2px 0;
+  .arch-box.box-data {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+    color: #1e40af;
   }
-  .arch-label {
-    font-size: .7rem;
-    font-weight: 600;
-    letter-spacing: .05em;
-    text-transform: uppercase;
+  .arch-box.box-process {
+    background: #f5f3ff;
+    border-color: #ddd6fe;
+    color: #6d28d9;
+  }
+  .arch-box.box-core-seq {
+    background: #fffbeb;
+    border-color: #fef08a;
+    color: #854d0e;
+  }
+  .arch-box.box-core-par {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+    color: #166534;
+  }
+  .arch-box.box-output-bad {
+    background: #fef2f2;
+    border-color: #fca5a5;
+    color: #991b1b;
+  }
+  .arch-box.box-output-good {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+    color: #166534;
+  }
+  .arch-arrow-svg {
+    width: 20px;
+    height: 14px;
     color: var(--color-muted);
+    fill: currentColor;
+    opacity: 0.6;
+  }
+  .arch-cores-pool {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+    width: 90%;
+    max-width: 240px;
+  }
+  .arch-mini-core {
+    background: #f8fafc;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    padding: 4px 2px;
+    font-size: .65rem;
+    font-weight: 700;
     text-align: center;
-    margin: 0;
+    color: var(--color-text);
+  }
+  .arch-mini-core.active {
+    background: #dcfce7;
+    border-color: #bbf7d0;
+    color: #166534;
   }
   .flex-col { display:flex; flex-direction:column; align-items:center; gap:6px; }
 
@@ -353,47 +539,53 @@ description: "Dokumentasi Parallel Network Traffic Inspection Engine — Impleme
     font-size: .9rem;
   }
   .perf-table thead tr {
-    background: #0f172a;
+    background: #f1f5f9;
   }
   .perf-table thead th {
-    color: #e2e8f0 !important;
-    font-weight: 600;
+    color: var(--color-heading) !important;
+    font-weight: 700;
     font-size: .8rem;
-    letter-spacing: .04em;
+    letter-spacing: .05em;
     text-transform: uppercase;
     padding: 14px 20px;
     border: none !important;
     text-align: left;
+    border-bottom: 1px solid var(--color-border) !important;
   }
   .perf-table tbody tr {
-    background: var(--color-surface);
+    background: #ffffff;
     border-bottom: 1px solid var(--color-border);
-    transition: background .15s;
+    transition: background .2s;
   }
   .perf-table tbody tr:last-child { border-bottom: none; }
-  .perf-table tbody tr:hover { background: var(--color-bg); }
+  .perf-table tbody tr:hover { background: #f8fafc; }
   .perf-table td {
     padding: 14px 20px;
     color: var(--color-text) !important;
     border: none !important;
+    border-bottom: 1px solid var(--color-border) !important;
+  }
+  .perf-table tbody tr:last-child td {
+    border-bottom: none !important;
   }
   .badge {
     display: inline-flex;
     align-items: center;
     gap: 4px;
     border-radius: 100px;
-    padding: 2px 10px;
-    font-size: .72rem;
+    padding: 4px 12px;
+    font-size: .75rem;
     font-weight: 600;
     letter-spacing: .02em;
   }
-  .badge-green  { background:#dcfce7; color:#15803d; }
-  .badge-red    { background:#fee2e2; color:#b91c1c; }
-  .badge-blue   { background:#dbeafe; color:#1d4ed8; }
+  .badge-green  { background: #dcfce7; border: 1px solid #bbf7d0; color:#15803d; }
+  .badge-red    { background: #fee2e2; border: 1px solid #fca5a5; color:#b91c1c; }
+  .badge-blue   { background: #dbeafe; border: 1px solid #bfdbfe; color:#1d4ed8; }
 
   /* ── CODE BLOCK ──────────────────────────────────── */
   .code-window {
     background: #0f172a;
+    border: 1px solid #1e293b;
     border-radius: var(--radius-md);
     overflow: hidden;
     margin: 24px 0;
@@ -411,15 +603,16 @@ description: "Dokumentasi Parallel Network Traffic Inspection Engine — Impleme
   .dot { width:12px; height:12px; border-radius:50%; }
   .dot-r { background: #ef4444; }
   .dot-y { background: #f59e0b; }
-  .dot-g { background: #22c55e; }
+  .dot-g { background: #10b981; }
   .code-filename {
     color: #94a3b8 !important;
     font-family: 'JetBrains Mono', monospace !important;
-    font-size: .78rem !important;
+    font-size: .8rem !important;
     margin: 0 !important;
+    font-weight: 500;
   }
   .code-body {
-    padding: 24px;
+    padding: 20px 24px;
     overflow-x: auto;
   }
   .code-body code, .code-body pre {
@@ -448,7 +641,7 @@ description: "Dokumentasi Parallel Network Traffic Inspection Engine — Impleme
     display: flex;
     align-items: flex-start;
     gap: 16px;
-    padding: 18px 0;
+    padding: 20px 0;
     border-bottom: 1px solid var(--color-border);
   }
   .steps-list li:last-child { border-bottom: none; }
@@ -458,24 +651,24 @@ description: "Dokumentasi Parallel Network Traffic Inspection Engine — Impleme
     color: #fff !important;
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-size: .8rem;
+    font-size: .85rem;
     font-weight: 700;
     flex-shrink: 0;
     margin-top: 2px;
   }
   .step-num::before { content: counter(step-counter); }
-  .steps-list li p { margin: 0 !important; font-size: .93rem !important; }
-  .steps-list li strong { display: block; margin-bottom: 4px; color: var(--color-heading) !important; }
+  .steps-list li p { margin: 0 !important; font-size: .95rem !important; color: var(--color-muted) !important; }
+  .steps-list li strong { display: block; margin-bottom: 4px; color: var(--color-heading) !important; font-size: 1rem; }
 
   /* ── INLINE CODE ─────────────────────────────────── */
   code:not([class]) {
     font-family: 'JetBrains Mono', monospace !important;
-    font-size: .82em !important;
+    font-size: .85em !important;
     background: #f1f5f9 !important;
     border: 1px solid #e2e8f0 !important;
-    border-radius: 4px !important;
-    padding: 1px 6px !important;
-    color: #7c3aed !important;
+    border-radius: 6px !important;
+    padding: 2px 6px !important;
+    color: var(--color-accent) !important;
   }
 
   /* ── DIVIDER ─────────────────────────────────────── */
@@ -488,58 +681,597 @@ description: "Dokumentasi Parallel Network Traffic Inspection Engine — Impleme
 
   /* ── FOOTER NOTE ─────────────────────────────────── */
   .page-footer-note {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
     padding: 24px 32px;
     margin-top: 48px;
     display: flex;
     align-items: center;
-    gap: 16px;
-    box-shadow: var(--shadow-sm);
+    gap: 20px;
+    background: #ffffff !important;
   }
   .page-footer-note p { margin: 0 !important; font-size: .88rem !important; color: var(--color-muted) !important; }
   .page-footer-note strong { color: var(--color-heading) !important; }
 
-  @media (max-width: 640px) {
-    .hero-section { padding: 36px 24px; }
-    .card { padding: 20px; }
-    .arch-row { flex-direction: column; }
-    .toc-list { grid-template-columns: 1fr; }
+  /* ── SIMULATOR INTERAKTIF (lebar mengikuti kartu induk) ── */
+  .sim-section {
+    width: 100%;
+    max-width: 100%;
+    margin: 24px 0 0;
+    box-sizing: border-box;
+    overflow: hidden;
   }
+  .sim-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  @media (min-width: 1024px) {
+    .sim-container {
+      grid-template-columns: 280px minmax(0, 1fr);
+      gap: 24px;
+      align-items: start;
+    }
+  }
+
+  .sim-control-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+    max-width: 100%;
+  }
+  .sim-settings-card {
+    padding: 20px !important;
+    margin: 0 !important;
+  }
+  .sim-settings-title {
+    margin: 0 0 16px !important;
+    font-size: .9rem !important;
+    color: var(--color-heading) !important;
+    font-weight: 700 !important;
+  }
+  .sim-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .sim-panel-block {
+    margin-bottom: 4px;
+  }
+  .sim-panel-block + .sim-panel-block {
+    margin-top: 16px;
+  }
+  .sim-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .sim-settings-card .sim-group + .sim-group {
+    margin-top: 16px;
+  }
+  .sim-label {
+    font-size: .75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--color-muted);
+    display: flex;
+    justify-content: space-between;
+  }
+  .sim-val-display {
+    color: var(--color-primary);
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .sim-range {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 5px;
+    border-radius: 2px;
+    background: #e2e8f0;
+    outline: none;
+  }
+  .sim-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: transform 0.1s;
+  }
+  .sim-range::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+  }
+
+  /* Core select buttons - Compact */
+  .core-selector-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 3px;
+  }
+  .core-btn {
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    padding: 5px 0;
+    border-radius: var(--radius-sm);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .core-btn:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+  }
+  .core-btn.active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: #ffffff;
+  }
+
+  /* Action buttons - Compact */
+  .sim-action-btn {
+    width: 100%;
+    padding: 8px 14px;
+    border-radius: var(--radius-sm);
+    font-weight: 700;
+    font-size: .82rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border: none;
+    box-shadow: var(--shadow-sm);
+  }
+  .btn-run-seq {
+    background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
+    color: #ffffff;
+  }
+  .btn-run-seq:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+  .btn-run-par {
+    background: linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%);
+    color: #ffffff;
+  }
+  .btn-run-par:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+  .btn-reset {
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+  }
+  .btn-reset:hover:not(:disabled) {
+    background: #f8fafc;
+  }
+  .sim-action-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+  }
+
+  .sim-board {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    box-shadow: var(--shadow-sm);
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  /* Queue Display - Compact */
+  .queue-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .queue-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: .8rem;
+    font-weight: 600;
+    color: var(--color-heading);
+  }
+  .queue-display {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 10px 12px;
+    background: #f8fafc;
+    border-radius: var(--radius-sm);
+    min-height: 48px;
+    max-height: 88px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    border: 1px solid var(--color-border);
+    align-items: flex-start;
+    align-content: flex-start;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .queue-display::-webkit-scrollbar {
+    height: 4px;
+  }
+  .queue-display::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 2px;
+  }
+  .packet {
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-family: 'Inter', sans-serif;
+    font-size: .75rem;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+  }
+  .packet.anomaly {
+    background: #fef2f2;
+    border-color: #fca5a5;
+    color: #991b1b;
+  }
+
+  /* Core grid visualization */
+  .cores-grid-header {
+    font-size: .8rem;
+    font-weight: 600;
+    color: var(--color-heading);
+    margin-bottom: 6px;
+    text-transform: none;
+    letter-spacing: normal;
+  }
+  .cores-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+    width: 100%;
+    max-width: 100%;
+  }
+  .cpu-core-card {
+    background: #f8fafc;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 8px 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    text-align: center;
+    min-height: 56px;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .cpu-core-card.active-pool {
+    background: #ffffff;
+    border-color: var(--color-border);
+  }
+  .cpu-core-card.working {
+    border-color: var(--color-primary);
+    background: #eff6ff;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.08);
+  }
+  .cpu-core-card.working-parallel {
+    border-color: var(--color-accent);
+    background: #f5f3ff;
+    box-shadow: 0 2px 6px rgba(124, 58, 237, 0.08);
+  }
+  .cpu-core-card.disabled {
+    opacity: 0.35;
+    background: #f1f5f9;
+    border-color: var(--color-border);
+    pointer-events: none;
+    box-shadow: none;
+  }
+  .core-name {
+    font-family: 'Outfit', sans-serif;
+    font-size: .65rem;
+    font-weight: 700;
+    color: var(--color-heading);
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .core-status-badge {
+    padding: 2px 6px;
+    border-radius: 100px;
+    font-size: .58rem;
+    font-weight: 700;
+    letter-spacing: .02em;
+    text-transform: uppercase;
+  }
+  .status-idle { background: #f1f5f9; color: #64748b; }
+  .status-working { 
+    background: #dbeafe; 
+    color: #1e40af; 
+    animation: pulse 1.5s infinite; 
+  }
+  .status-working-par {
+    background: #ede9fe; 
+    color: #5b21b6; 
+    animation: pulse 1.5s infinite; 
+  }
+  .status-aman { background: #dcfce7; color: #166534; }
+  .status-anomali { 
+    background: #fee2e2; 
+    color: #991b1b; 
+    animation: pulse 0.8s infinite;
+  }
+  .status-disabled { background: transparent; color: #94a3b8; border: 1px solid var(--color-border); }
+  .core-batch-info {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .6rem;
+    color: var(--color-muted);
+  }
+
+  /* Spinner icon */
+  .spinner-mini {
+    width: 16px; height: 16px;
+    border: 2px solid #e2e8f0;
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  .working-parallel .spinner-mini {
+    border-top-color: var(--color-accent);
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .sim-terminal {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    min-height: 120px;
+    max-height: 160px;
+    overflow-y: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .72rem;
+    line-height: 1.5;
+  }
+  .terminal-line {
+    margin-bottom: 4px;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+  .term-info { color: #94a3b8; }
+  .term-success { color: #4ade80; font-weight: 500; }
+  .term-warn { color: #f87171; font-weight: 500; }
+  .term-system { color: #93c5fd; font-weight: 600; }
+
+  /* Results dashboard - Compact */
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+    margin-top: 6px;
+  }
+  @media (min-width: 576px) {
+    .results-grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+  }
+  .res-box {
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 8px 10px;
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+  }
+  .res-lbl {
+    font-size: .65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--color-muted);
+    margin-bottom: 2px;
+  }
+  .res-val {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-heading);
+  }
+  .res-box.speedup {
+    border-color: #bbf7d0;
+    background: #f0fdf4;
+  }
+  .res-box.speedup .res-val {
+    color: #16a34a;
+  }
+
+  /* Comparison chart (Slimmer design) */
+  .chart-container {
+    background: #f8fafc;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 18px 20px;
+    box-shadow: var(--shadow-sm);
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+  .card-simulator {
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  .chart-title {
+    font-size: .75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--color-muted);
+    margin-bottom: 12px;
+  }
+  .chart-row-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 10px;
+  }
+  .chart-row-bar:last-child { margin-bottom: 0; }
+  .bar-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    font-size: .78rem;
+    font-weight: 500;
+  }
+  .bar-info span:first-child {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .bar-info span:last-child {
+    flex-shrink: 0;
+  }
+  .bar-track {
+    background: #e2e8f0;
+    height: 22px;
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid var(--color-border);
+  }
+  .bar-fill {
+    height: 100%;
+    width: 0%;
+    transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+  }
+  .fill-seq {
+    background: linear-gradient(90deg, #1d4ed8 0%, #3b82f6 100%);
+  }
+  .fill-par {
+    background: linear-gradient(90deg, #6d28d9 0%, #7c3aed 100%);
+  }
+  .bar-text {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: .7rem;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    color: #ffffff;
+  }
+
+  /* Speedup comparison banner */
+  .conclusion-banner {
+    background: linear-gradient(135deg, #f0fdf4 0%, #eff6ff 100%);
+    border: 1px solid #bbf7d0;
+    border-radius: var(--radius-sm);
+    padding: 10px 16px;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .conclusion-icon {
+    font-size: 1.4rem;
+  }
+  .conclusion-text p { margin: 0 !important; font-size: .82rem !important; color: var(--color-text) !important; }
+  .conclusion-text strong { color: var(--color-heading); }
+
+  @media (max-width: 640px) {
+    .page-wrapper { padding: 0 16px 32px !important; }
+    .hero-section { padding: 28px 20px; }
+    .hero-title { font-size: 1.75rem !important; }
+    .card { padding: 18px 16px; }
+    .sim-board { padding: 16px; }
+    .cores-grid { grid-template-columns: repeat(4, 1fr); gap: 4px; }
+    .core-selector-grid { grid-template-columns: repeat(5, 1fr); }
+  }
+
+  /* Hide default Jekyll sidebar noise on this page */
+  .site-nav, .site-header { display: none !important; }
+  .side-bar { display: none !important; }
+  .main { margin-left: 0 !important; max-width: 100% !important; }
 </style>
+
+<!-- ════════════════════════════════════════════════════════
+     NAVBAR (FULL-WIDTH STICKY)
+  ════════════════════════════════════════════════════════ -->
+<nav class="navbar">
+  <div class="nav-inner">
+    <a class="nav-brand" href="#">🔒 <span>Network</span> Inspection</a>
+    <ul class="nav-list">
+      <li><a href="#latar-belakang">Latar Belakang</a></li>
+      <li><a href="#arsitektur">Arsitektur</a></li>
+      <li><a href="#simulator">Simulator</a></li>
+      <li><a href="#performa">Performa</a></li>
+      <li><a href="#eksekusi">Eksekusi</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="page-wrapper">
 
 <!-- ════════════════════════════════════════════════════════
      HERO SECTION
   ════════════════════════════════════════════════════════ -->
 <div class="hero-section">
-  <div class="hero-badge">🔬 Evaluasi Akhir &nbsp;·&nbsp; IFB 206 Komputasi Paralel</div>
+  <div class="hero-badge">IFB 206 &mdash; Komputasi Paralel</div>
   <h1 class="hero-title">Parallel Network Traffic<br>Inspection Engine</h1>
   <p class="hero-subtitle">
-    Demonstrasi implementasi <strong style="color:#bfdbfe">Python Multiprocessing</strong> untuk mempercepat inspeksi
-    batch <em>log</em> jaringan secara <em>real-time</em> — membandingkan pendekatan
-    <em>sequential</em> vs. <em>parallel</em> secara empiris.
+    Demonstrasi <strong style="color:var(--color-primary)">Python Multiprocessing</strong> untuk mempercepat inspeksi
+    batch <em>log</em> jaringan — membandingkan pendekatan <em>sequential</em> vs. <em>parallel</em>
+    secara empiris melalui simulasi interaktif dan skrip <code>main.py</code>.
   </p>
+
+  <div class="hero-members-card">
+    <div class="hero-meta-label">Anggota Kelompok</div>
+    <div class="hero-members-list">
+      <div class="hero-member-name">Lifyana Nailah Azzahra (152024107)</div>
+      <div class="hero-member-name">Nik Intan Elyana (152024132)</div>
+    </div>
+  </div>
+
   <div class="hero-meta">
-    <div class="hero-meta-item">🏫 <span>Institusi</span> &nbsp;Institut Teknologi Nasional Bandung</div>
-    <div class="hero-meta-item">📚 <span>Mata Kuliah</span> &nbsp;IFB 206 Komputasi Paralel</div>
-    <div class="hero-meta-item">🐍 <span>Bahasa</span> &nbsp;Python 3.x &mdash; multiprocessing</div>
-    <div class="hero-meta-item">📅 <span>Tahun</span> &nbsp;2025 / 2026</div>
+    <div class="hero-meta-left">
+      <div class="hero-meta-item">🏫 <span>Institusi:</span> &nbsp;Institut Teknologi Nasional Bandung</div>
+      <div class="hero-meta-item">📚 <span>Mata Kuliah:</span> &nbsp;IFB 206 Komputasi Paralel</div>
+      <div class="hero-meta-item">🐍 <span>Bahasa:</span> &nbsp;Python 3.x &mdash; multiprocessing</div>
+      <div class="hero-meta-item">📅 <span>Tahun:</span> &nbsp;2025 / 2026</div>
+    </div>
   </div>
 </div>
 
-<!-- ════════════════════════════════════════════════════════
-     TABLE OF CONTENTS
-  ════════════════════════════════════════════════════════ -->
-<div class="toc-card">
-  <p class="toc-title">📑 Daftar Isi</p>
-  <ul class="toc-list">
-    <li><a href="#latar-belakang"><span class="toc-num">1</span> Latar Belakang</a></li>
-    <li><a href="#arsitektur"><span class="toc-num">2</span> Desain Arsitektur Sistem</a></li>
-    <li><a href="#performa"><span class="toc-num">3</span> Analisis Performa</a></li>
-    <li><a href="#eksekusi"><span class="toc-num">4</span> Instruksi Eksekusi</a></li>
-  </ul>
-</div>
 
 <!-- ════════════════════════════════════════════════════════
      SECTION 1 — LATAR BELAKANG
@@ -626,54 +1358,76 @@ description: "Dokumentasi Parallel Network Traffic Inspection Engine — Impleme
   </p>
 </div>
 
-<!-- Architecture Diagram (Visual HTML-based, no Mermaid dependency) -->
-<div class="arch-diagram">
-  <p class="arch-label" style="margin-bottom:20px">Alur Sistem Inspeksi Paralel</p>
-
-  <!-- Source -->
-  <div class="arch-row">
-    <div class="arch-node node-source">📦 Dataset<br><small>Batch Log Jaringan</small></div>
-  </div>
-  <div class="arch-arrow-down">⬇️</div>
-
-  <!-- Hub -->
-  <div class="arch-row">
-    <div class="arch-node node-hub">🔀 Sistem Inspeksi<br><small>Dispatcher</small></div>
-  </div>
-  <div class="arch-arrow-down"></div>
-
-  <!-- Split -->
-  <div class="arch-row">
-    <div class="flex-col">
-      <div class="arch-node node-seq" style="min-width:200px">
-        ⚠️ <strong>Cara Lama: Sequential</strong><br>
-        <small>1 Core — baris per baris</small>
+<div class="arch-container">
+  <!-- Sequential Column -->
+  <div class="arch-column">
+    <div class="arch-column-title">⚠️ Metode Sekuensial (1 CPU Core)</div>
+    <div class="arch-flow">
+      <div class="arch-box box-data">
+        📦 Dataset
+        <div style="font-size: .7rem; font-weight: normal; opacity: 0.8; margin-top: 2px;">Batch Log Jaringan (N data)</div>
       </div>
-      <div style="margin-top:6px">
-        <div class="arch-node node-out-bad" style="min-width:200px; padding:8px 16px">
-          😓 Deteksi Lambat / <em>Bottleneck</em>
-        </div>
+      
+      <svg class="arch-arrow-svg" viewBox="0 0 24 24" width="20" height="14" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
+      
+      <div class="arch-box box-process">
+        🔀 Single Queue Dispatcher
+        <div style="font-size: .7rem; font-weight: normal; opacity: 0.8; margin-top: 2px;">Memproses satu per satu</div>
+      </div>
+      
+      <svg class="arch-arrow-svg" viewBox="0 0 24 24" width="20" height="14" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
+      
+      <div class="arch-box box-core-seq">
+        💻 CPU Core 1
+        <div style="font-size: .7rem; font-weight: normal; opacity: 0.8; margin-top: 2px;">Beban 100% (Single core)</div>
+      </div>
+      
+      <svg class="arch-arrow-svg" viewBox="0 0 24 24" width="20" height="14" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
+      
+      <div class="arch-box box-output-bad">
+        😓 Deteksi Lambat / Bottleneck
+        <div style="font-size: .7rem; font-weight: normal; opacity: 0.8; margin-top: 2px;">Waktu pemrosesan = N × Delay</div>
       </div>
     </div>
+  </div>
 
-    <div style="font-size:2rem; color:#cbd5e1; align-self:center">⟷</div>
-
-    <div class="flex-col">
-      <div class="arch-node node-par" style="min-width:200px">
-        ✅ <strong>Cara Baru: Paralel</strong><br>
-        <small>Pool Multiprocessing</small>
+  <!-- Parallel Column -->
+  <div class="arch-column">
+    <div class="arch-column-title">⚡ Metode Paralel (Multiprocessing Pool)</div>
+    <div class="arch-flow">
+      <div class="arch-box box-data">
+        📦 Dataset
+        <div style="font-size: .7rem; font-weight: normal; opacity: 0.8; margin-top: 2px;">Batch Log Jaringan (N data)</div>
       </div>
-      <div class="arch-arrow-down">⬇️</div>
-      <div class="arch-row" style="gap:8px; margin:0">
-        <div class="arch-node node-worker">⚙️ Worker 1</div>
-        <div class="arch-node node-worker">⚙️ Worker 2</div>
-        <div class="arch-node node-worker">⚙️ Worker 3</div>
+      
+      <svg class="arch-arrow-svg" viewBox="0 0 24 24" width="20" height="14" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
+      
+      <div class="arch-box box-process">
+        🔀 Multiprocessing Pool Dispatcher
+        <div style="font-size: .7rem; font-weight: normal; opacity: 0.8; margin-top: 2px;">Membagi log menjadi chunks</div>
       </div>
-      <div class="arch-arrow-down">⬇️</div>
-      <div class="arch-node node-hub" style="min-width:200px">🗂️ Agregasi Status</div>
-      <div class="arch-arrow-down">⬇️</div>
-      <div class="arch-node node-out-ok" style="min-width:200px; padding:8px 16px">
-        ⚡ Deteksi Real-time &amp; Cepat
+      
+      <svg class="arch-arrow-svg" viewBox="0 0 24 24" width="20" height="14" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
+      
+      <div class="arch-cores-pool">
+        <div class="arch-mini-core active">Core 1</div>
+        <div class="arch-mini-core active">Core 2</div>
+        <div class="arch-mini-core active">Core 3</div>
+        <div class="arch-mini-core active">Core 4</div>
+      </div>
+      
+      <svg class="arch-arrow-svg" viewBox="0 0 24 24" width="20" height="14" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
+      
+      <div class="arch-box box-core-par">
+        🗂️ Agregasi Hasil (Pool.map)
+        <div style="font-size: .7rem; font-weight: normal; opacity: 0.8; margin-top: 2px;">Menggabungkan hasil deteksi</div>
+      </div>
+      
+      <svg class="arch-arrow-svg" viewBox="0 0 24 24" width="20" height="14" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
+      
+      <div class="arch-box box-output-good">
+        ⚡ Deteksi Real-Time &amp; Cepat
+        <div style="font-size: .7rem; font-weight: normal; opacity: 0.8; margin-top: 2px;">Waktu pemrosesan ≈ (N / Cores) × Delay</div>
       </div>
     </div>
   </div>
@@ -694,12 +1448,151 @@ description: "Dokumentasi Parallel Network Traffic Inspection Engine — Impleme
 <hr class="section-divider">
 
 <!-- ════════════════════════════════════════════════════════
-     SECTION 3 — PERFORMA
+     SECTION 3 — SIMULATOR INTERAKTIF
+  ════════════════════════════════════════════════════════ -->
+<div class="section-anchor" id="simulator">
+  <div class="section-icon icon-purple">🎮</div>
+  <div>
+    <span class="section-label">Bagian 03</span>
+    <h2 class="section-title-text">Simulator Inspeksi Jaringan (Live Demo)</h2>
+  </div>
+</div>
+
+<div class="card card-simulator">
+  <p>
+    Untuk memahami konsep komputasi paralel secara konkret, jalankan simulasi interaktif di bawah ini.
+    Anda dapat membandingkan bagaimana satu CPU core memproses log jaringan satu-per-satu (Sequential)
+    dibandingkan beberapa CPU core memproses secara konkuren bersama-sama (Parallel) secara <strong>real-time</strong>.
+  </p>
+
+  <div class="sim-section">
+  <div class="sim-container">
+    <div class="sim-control-panel">
+      <div class="card sim-settings-card">
+        <h4 class="sim-settings-title">⚙️ Pengaturan Simulasi</h4>
+
+        <div class="sim-group">
+          <label class="sim-label">
+            <span>Jumlah Batch Log</span>
+            <span class="sim-val-display" id="sim-batch-val">40</span>
+          </label>
+          <input type="range" min="10" max="100" value="40" step="5" class="sim-range" id="sim-batch-slider">
+        </div>
+
+        <div class="sim-group">
+          <label class="sim-label">
+            <span>Core Paralel (Worker)</span>
+          </label>
+          <div class="core-selector-grid">
+            <button type="button" class="core-btn" data-cores="2">2</button>
+            <button type="button" class="core-btn" data-cores="4">4</button>
+            <button type="button" class="core-btn active" data-cores="8">8</button>
+            <button type="button" class="core-btn" data-cores="12">12</button>
+            <button type="button" class="core-btn" data-cores="16">16</button>
+          </div>
+        </div>
+
+        <div class="sim-group">
+          <label class="sim-label">
+            <span>Beban per Batch</span>
+            <span class="sim-val-display" id="sim-delay-val">150ms</span>
+          </label>
+          <input type="range" min="50" max="500" value="150" step="25" class="sim-range" id="sim-delay-slider">
+        </div>
+      </div>
+
+      <div class="sim-actions">
+        <button type="button" class="sim-action-btn btn-run-seq" id="btn-run-seq">🏎️ Jalankan Sequential</button>
+        <button type="button" class="sim-action-btn btn-run-par" id="btn-run-par">⚡ Jalankan Paralel</button>
+        <button type="button" class="sim-action-btn btn-reset" id="btn-reset">🔄 Reset</button>
+      </div>
+    </div>
+
+    <div class="sim-board">
+      <div class="queue-wrapper sim-panel-block">
+        <div class="queue-header">
+          <span>📥 Antrean Log Masuk</span>
+          <span id="queue-count">40 batch tersisa</span>
+        </div>
+        <div class="queue-display" id="queue-display"></div>
+      </div>
+
+      <div class="sim-panel-block">
+        <div class="cores-grid-header">💻 Status Worker CPU</div>
+        <div class="cores-grid" id="cores-grid"></div>
+      </div>
+
+      <div class="sim-panel-block">
+        <div class="cores-grid-header">📊 Metrik Simulasi</div>
+        <div class="results-grid">
+          <div class="res-box">
+            <div class="res-lbl">Waktu Sekuensial</div>
+            <div class="res-val" id="res-seq-time">—</div>
+          </div>
+          <div class="res-box">
+            <div class="res-lbl">Waktu Paralel</div>
+            <div class="res-val" id="res-par-time">—</div>
+          </div>
+          <div class="res-box speedup">
+            <div class="res-lbl">Speedup</div>
+            <div class="res-val" id="res-speedup">—</div>
+          </div>
+          <div class="res-box">
+            <div class="res-lbl">Efisiensi Core</div>
+            <div class="res-val" id="res-efficiency">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sim-panel-block">
+        <div class="cores-grid-header">📜 Terminal Log</div>
+        <div class="sim-terminal" id="sim-terminal"></div>
+      </div>
+
+      <div class="chart-container sim-panel-block">
+        <div class="chart-title">📈 Perbandingan Kecepatan</div>
+        <div class="chart-row-bar">
+          <div class="bar-info">
+            <span>🏎️ Sequential (1 Core)</span>
+            <span id="val-seq-text">—</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill fill-seq" id="bar-seq"></div>
+            <span class="bar-text">Seq</span>
+          </div>
+        </div>
+        <div class="chart-row-bar">
+          <div class="bar-info">
+            <span>⚡ Paralel (Multi-core)</span>
+            <span id="val-par-text">—</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill fill-par" id="bar-par"></div>
+            <span class="bar-text">Par</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="conclusion-banner" id="conclusion-container" style="display: none;">
+        <div class="conclusion-icon">🚀</div>
+        <div class="conclusion-text">
+          <p id="conclusion-text">Jalankan kedua metode untuk melihat analisis speedup.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- ════════════════════════════════════════════════════════
+     SECTION 4 — PERFORMA
   ════════════════════════════════════════════════════════ -->
 <div class="section-anchor" id="performa">
   <div class="section-icon icon-green">⚡</div>
   <div>
-    <span class="section-label">Bagian 03</span>
+    <span class="section-label">Bagian 04</span>
     <h2 class="section-title-text">Analisis Performa</h2>
   </div>
 </div>
@@ -777,12 +1670,12 @@ description: "Dokumentasi Parallel Network Traffic Inspection Engine — Impleme
 <hr class="section-divider">
 
 <!-- ════════════════════════════════════════════════════════
-     SECTION 4 — EKSEKUSI
+     SECTION 5 — EKSEKUSI
   ════════════════════════════════════════════════════════ -->
 <div class="section-anchor" id="eksekusi">
   <div class="section-icon icon-orange">💻</div>
   <div>
-    <span class="section-label">Bagian 04</span>
+    <span class="section-label">Bagian 05</span>
     <h2 class="section-title-text">Instruksi Eksekusi</h2>
   </div>
 </div>
@@ -880,3 +1773,487 @@ description: "Dokumentasi Parallel Network Traffic Inspection Engine — Impleme
     </p>
   </div>
 </div>
+
+<!-- ════════════════════════════════════════════════════════
+     SIMULATOR JAVASCRIPT LOGIC
+     ════════════════════════════════════════════════════════ -->
+<script>
+  (function() {
+    // State Variables
+    let totalBatches = 40;
+    let selectedCores = 8;
+    let baseDelayMs = 150;
+    let isSimulating = false;
+    let seqTime = null;
+    let parTime = null;
+    let abortController = null;
+
+    // DOM Elements
+    const batchSlider = document.getElementById('sim-batch-slider');
+    const batchVal = document.getElementById('sim-batch-val');
+    const delaySlider = document.getElementById('sim-delay-slider');
+    const delayVal = document.getElementById('sim-delay-val');
+    const coreButtons = document.querySelectorAll('.core-btn');
+    const btnSeq = document.getElementById('btn-run-seq');
+    const btnPar = document.getElementById('btn-run-par');
+    const btnReset = document.getElementById('btn-reset');
+    const queueDisplay = document.getElementById('queue-display');
+    const queueCount = document.getElementById('queue-count');
+    const coresGrid = document.getElementById('cores-grid');
+    const terminal = document.getElementById('sim-terminal');
+    
+    // Result displays
+    const resSeqTime = document.getElementById('res-seq-time');
+    const resParTime = document.getElementById('res-par-time');
+    const resSpeedup = document.getElementById('res-speedup');
+    const resEfficiency = document.getElementById('res-efficiency');
+    const barSeq = document.getElementById('bar-seq');
+    const barPar = document.getElementById('bar-par');
+    const valSeqText = document.getElementById('val-seq-text');
+    const valParText = document.getElementById('val-par-text');
+    const conclusionText = document.getElementById('conclusion-text');
+    const conclusionContainer = document.getElementById('conclusion-container');
+
+    // Init UI
+    function init() {
+      // Event Listeners
+      batchSlider.addEventListener('input', (e) => {
+        totalBatches = parseInt(e.target.value);
+        batchVal.textContent = totalBatches;
+        resetSimulation();
+      });
+
+      delaySlider.addEventListener('input', (e) => {
+        baseDelayMs = parseInt(e.target.value);
+        delayVal.textContent = baseDelayMs + 'ms';
+      });
+
+      coreButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          if (isSimulating) return;
+          coreButtons.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          selectedCores = parseInt(btn.dataset.cores);
+          resetSimulation();
+        });
+      });
+
+      btnSeq.addEventListener('click', runSequential);
+      btnPar.addEventListener('click', runParallel);
+      btnReset.addEventListener('click', () => {
+        resetSimulation();
+        logToTerminal('Simulator di-reset. Pilih metode untuk memulai.', 'system');
+      });
+
+      resetSimulation();
+      logToTerminal('Simulator diinisialisasi. Siap menjalankan inspeksi.', 'system');
+    }
+
+    // Logging helper
+    function logToTerminal(text, type = 'info') {
+      const line = document.createElement('div');
+      line.className = 'terminal-line';
+      const timeStr = new Date().toLocaleTimeString().split(' ')[0];
+      let prefix = `[${timeStr}] `;
+      
+      if (type === 'system') {
+        line.innerHTML = `<span class="term-system">${prefix}⚙️ ${text}</span>`;
+      } else if (type === 'success') {
+        line.innerHTML = `<span class="term-success">${prefix}✔ ${text}</span>`;
+      } else if (type === 'warn') {
+        line.innerHTML = `<span class="term-warn">${prefix}⚠ ${text}</span>`;
+      } else {
+        line.innerHTML = `<span class="term-info">${prefix}▪ ${text}</span>`;
+      }
+      
+      terminal.appendChild(line);
+      terminal.scrollTop = terminal.scrollHeight;
+    }
+
+    // Reset simulator UI and states
+    function resetSimulation() {
+      if (abortController) {
+        abortController.abort();
+      }
+      isSimulating = false;
+      
+      // Enable inputs
+      batchSlider.disabled = false;
+      coreButtons.forEach(btn => btn.disabled = false);
+      btnSeq.disabled = false;
+      btnPar.disabled = false;
+      
+      // Clear visual queue
+      queueDisplay.innerHTML = '';
+      for (let i = 1; i <= totalBatches; i++) {
+        const p = document.createElement('div');
+        p.className = 'packet';
+        p.id = `packet-${i}`;
+        p.textContent = `Batch #${i}`;
+        // 10% chance of being simulated anomaly visuals
+        if (Math.random() < 0.1) {
+          p.classList.add('anomaly');
+          p.textContent = `Batch #${i} ⚠`;
+        }
+        queueDisplay.appendChild(p);
+      }
+      queueCount.textContent = `${totalBatches} batch tersisa`;
+
+      // Draw Cores
+      drawCoresGrid(false); // Draw as idle / active based on mode
+      
+      // Clear terminal
+      terminal.innerHTML = '';
+    }
+
+    // Draw CPU Cores
+    function drawCoresGrid(isParallelMode = false) {
+      coresGrid.innerHTML = '';
+      
+      // Sequential Mode: Only 1 active core, others disabled
+      // Parallel Mode: selectedCores are active, others up to 16 are disabled
+      const activeCount = isParallelMode ? selectedCores : 1;
+      
+      for (let i = 1; i <= 16; i++) {
+        const coreCard = document.createElement('div');
+        coreCard.className = 'cpu-core-card';
+        coreCard.id = `core-card-${i}`;
+        
+        if (i <= activeCount) {
+          coreCard.classList.add('active-pool');
+          coreCard.innerHTML = `
+            <div class="core-name">CPU Core ${i}</div>
+            <div class="core-status-badge status-idle" id="core-status-${i}">IDLE</div>
+            <div class="core-batch-info" id="core-info-${i}">Menunggu...</div>
+          `;
+        } else {
+          coreCard.classList.add('disabled');
+          coreCard.innerHTML = `
+            <div class="core-name" style="opacity:0.5">CPU Core ${i}</div>
+            <div class="core-status-badge status-disabled">DISABLED</div>
+            <div class="core-batch-info" style="opacity:0.2">—</div>
+          `;
+        }
+        coresGrid.appendChild(coreCard);
+      }
+    }
+
+    // Sleep promise that supports aborting
+    function sleep(ms, signal) {
+      return new Promise((resolve, reject) => {
+        const timer = setTimeout(resolve, ms);
+        if (signal) {
+          signal.addEventListener('abort', () => {
+            clearTimeout(timer);
+            reject(new DOMException('Aborted', 'AbortError'));
+          });
+        }
+      });
+    }
+
+    // Sequential Run
+    async function runSequential() {
+      if (isSimulating) return;
+      isSimulating = true;
+      abortController = new AbortController();
+      const signal = abortController.signal;
+
+      // Lock controls
+      batchSlider.disabled = true;
+      coreButtons.forEach(btn => btn.disabled = true);
+      btnSeq.disabled = true;
+      btnPar.disabled = true;
+
+      // Setup UI
+      terminal.innerHTML = '';
+      logToTerminal('Memulai Pemrosesan Sekuensial (1 CPU Core)...', 'system');
+      logToTerminal(`Jumlah batch: ${totalBatches} batch`, 'info');
+      logToTerminal('Inisialisasi core...', 'info');
+      drawCoresGrid(false);
+
+      const startTime = performance.now();
+      const coreCard = document.getElementById('core-card-1');
+      const coreStatus = document.getElementById('core-status-1');
+      const coreInfo = document.getElementById('core-info-1');
+
+      try {
+        for (let i = 1; i <= totalBatches; i++) {
+          if (signal.aborted) return;
+          
+          // Pull packet from queue visually
+          const p = document.getElementById(`packet-${i}`);
+          if (p) {
+            p.style.opacity = '0.3';
+            p.style.transform = 'scale(0.8)';
+          }
+          queueCount.textContent = `${totalBatches - i} batch tersisa`;
+          
+          // Set Core 1 to Working
+          coreCard.className = 'cpu-core-card active-pool working';
+          coreStatus.className = 'core-status-badge status-working';
+          coreStatus.textContent = 'WORKING';
+          coreInfo.textContent = `Batch #${i}`;
+          logToTerminal(`Core 1 memproses Batch #${i} (simulasi komputasi berat)...`);
+
+          // Add spinner
+          const spinner = document.createElement('div');
+          spinner.className = 'spinner-mini';
+          coreCard.appendChild(spinner);
+
+          // Simulated delay (representing CPU load)
+          await sleep(baseDelayMs, signal);
+
+          if (signal.aborted) return;
+
+          // Remove spinner
+          const sp = coreCard.querySelector('.spinner-mini');
+          if (sp) sp.remove();
+
+          // Result distribution (90% Safe, 10% Anomaly)
+          const isAnomaly = Math.random() < 0.1;
+          if (isAnomaly) {
+            coreStatus.className = 'core-status-badge status-anomali';
+            coreStatus.textContent = 'ANOMALI';
+            coreCard.style.borderColor = 'var(--color-danger)';
+            logToTerminal(`⚠️ Anomali terdeteksi pada Batch #${i}!`, 'warn');
+          } else {
+            coreStatus.className = 'core-status-badge status-aman';
+            coreStatus.textContent = '✓ AMAN';
+            coreCard.style.borderColor = 'var(--color-success)';
+            logToTerminal(`Batch #${i} aman.`, 'success');
+          }
+
+          // brief pause to show result state
+          await sleep(Math.min(100, baseDelayMs * 0.5), signal);
+          coreCard.style.borderColor = '';
+        }
+
+        // Completion
+        const elapsedSec = ((performance.now() - startTime) / 1000).toFixed(3);
+        seqTime = parseFloat(elapsedSec);
+        resSeqTime.textContent = elapsedSec + 's';
+        logToTerminal(`Inspeksi Sekuensial Selesai! Total Waktu: ${elapsedSec} detik`, 'system');
+        
+        isSimulating = false;
+        btnSeq.disabled = false;
+        btnPar.disabled = false;
+        batchSlider.disabled = false;
+        coreButtons.forEach(btn => btn.disabled = false);
+
+        updateDashboard();
+
+      } catch (err) {
+        if (err.name === 'AbortError') {
+          console.log('Sequential simulation aborted');
+        } else {
+          console.error(err);
+        }
+      }
+    }
+
+    // Parallel Run
+    async function runParallel() {
+      if (isSimulating) return;
+      isSimulating = true;
+      abortController = new AbortController();
+      const signal = abortController.signal;
+
+      // Lock controls
+      batchSlider.disabled = true;
+      coreButtons.forEach(btn => btn.disabled = true);
+      btnSeq.disabled = true;
+      btnPar.disabled = true;
+
+      // Setup UI
+      terminal.innerHTML = '';
+      logToTerminal(`Memulai Pemrosesan Paralel (${selectedCores} CPU Cores)...`, 'system');
+      logToTerminal(`Jumlah batch: ${totalBatches} batch`, 'info');
+      logToTerminal(`Mengaktifkan ${selectedCores} worker processes...`, 'info');
+      drawCoresGrid(true);
+
+      const startTime = performance.now();
+      let queue = [...Array(totalBatches).keys()].map(x => x + 1); // 1 to totalBatches
+      let completedCount = 0;
+
+      // Track packets processed
+      async function worker(coreId) {
+        const coreCard = document.getElementById(`core-card-${coreId}`);
+        const coreStatus = document.getElementById(`core-status-${coreId}`);
+        const coreInfo = document.getElementById(`core-info-${coreId}`);
+
+        while (queue.length > 0 && !signal.aborted) {
+          const batchId = queue.shift();
+          if (batchId === undefined) break;
+
+          // Pull packet from queue visually
+          const p = document.getElementById(`packet-${batchId}`);
+          if (p) {
+            p.style.opacity = '0.3';
+            p.style.transform = 'scale(0.8)';
+          }
+          queueCount.textContent = `${queue.length} batch tersisa`;
+
+          // Set core status to working
+          coreCard.className = 'cpu-core-card active-pool working working-parallel';
+          coreStatus.className = 'core-status-badge status-working-par';
+          coreStatus.textContent = 'WORKING';
+          coreInfo.textContent = `Batch #${batchId}`;
+          logToTerminal(`Core ${coreId} memproses Batch #${batchId}...`);
+
+          // Add spinner
+          const spinner = document.createElement('div');
+          spinner.className = 'spinner-mini';
+          coreCard.appendChild(spinner);
+
+          // Simulated delay per core with tiny random variance
+          const variableDelay = baseDelayMs * (0.8 + Math.random() * 0.4);
+          await sleep(variableDelay, signal);
+
+          if (signal.aborted) return;
+
+          // Remove spinner
+          const sp = coreCard.querySelector('.spinner-mini');
+          if (sp) sp.remove();
+
+          // Result distribution (90% Safe, 10% Anomaly)
+          const isAnomaly = Math.random() < 0.1;
+          if (isAnomaly) {
+            coreStatus.className = 'core-status-badge status-anomali';
+            coreStatus.textContent = 'ANOMALI';
+            coreCard.style.borderColor = 'var(--color-danger)';
+            logToTerminal(`⚠️ Anomali terdeteksi pada Batch #${batchId} oleh Core ${coreId}!`, 'warn');
+          } else {
+            coreStatus.className = 'core-status-badge status-aman';
+            coreStatus.textContent = '✓ AMAN';
+            coreCard.style.borderColor = 'var(--color-success)';
+            logToTerminal(`Batch #${batchId} selesai diproses oleh Core ${coreId}.`, 'success');
+          }
+
+          completedCount++;
+          
+          // Brief pause to show completion state
+          await sleep(Math.min(100, baseDelayMs * 0.4), signal);
+          coreCard.style.borderColor = '';
+        }
+
+        // Set core back to idle
+        if (!signal.aborted) {
+          coreCard.className = 'cpu-core-card active-pool';
+          coreStatus.className = 'core-status-badge status-idle';
+          coreStatus.textContent = 'IDLE';
+          coreInfo.textContent = 'Menunggu...';
+        }
+      }
+
+      try {
+        // Spawn active core workers concurrently
+        const workerPromises = [];
+        for (let i = 1; i <= selectedCores; i++) {
+          workerPromises.push(worker(i));
+        }
+
+        await Promise.all(workerPromises);
+
+        if (signal.aborted) return;
+
+        // Completion
+        const elapsedSec = ((performance.now() - startTime) / 1000).toFixed(3);
+        parTime = parseFloat(elapsedSec);
+        resParTime.textContent = elapsedSec + 's';
+        logToTerminal(`Inspeksi Paralel Selesai! Total Waktu: ${elapsedSec} detik`, 'system');
+        
+        isSimulating = false;
+        btnSeq.disabled = false;
+        btnPar.disabled = false;
+        batchSlider.disabled = false;
+        coreButtons.forEach(btn => btn.disabled = false);
+
+        updateDashboard();
+
+      } catch (err) {
+        if (err.name === 'AbortError') {
+          console.log('Parallel simulation aborted');
+        } else {
+          console.error(err);
+        }
+      }
+    }
+
+    // Update charts and speedup stats
+    function updateDashboard() {
+      if (seqTime) {
+        valSeqText.textContent = seqTime + 's';
+        // Normalize bars: max sequential is 100% width
+        barSeq.style.width = '100%';
+      }
+      
+      if (parTime) {
+        valParText.textContent = parTime + 's';
+        if (seqTime) {
+          const widthPercent = Math.max(10, Math.min(100, (parTime / seqTime) * 100));
+          barPar.style.width = widthPercent + '%';
+        } else {
+          barPar.style.width = '100%';
+        }
+      }
+
+      if (seqTime && parTime) {
+        const speedup = (seqTime / parTime).toFixed(2);
+        const efficiency = ((speedup / selectedCores) * 100).toFixed(1);
+
+        resSpeedup.textContent = speedup + 'x';
+        resEfficiency.textContent = efficiency + '%';
+
+        // Update explanation banner
+        conclusionContainer.style.display = 'flex';
+        conclusionText.innerHTML = `
+          Pemrosesan paralel dengan <strong>${selectedCores} CPU Cores</strong> selesai <strong>${speedup}x lebih cepat</strong> 
+          dibandingkan metode sekuensial. Tingkat efisiensi pemanfaatan CPU core adalah <strong>${efficiency}%</strong>. 
+          Ini membuktikan secara empiris keunggulan efisiensi komputasi paralel dalam mempercepat pemindaian lalu lintas jaringan!
+        `;
+      } else {
+        resSpeedup.textContent = '—';
+        resEfficiency.textContent = '—';
+        conclusionContainer.style.display = 'none';
+      }
+    }
+
+    // Run init on DOM load
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  })();
+</script>
+
+<!-- Scroll-spy for navbar active state -->
+<script>
+(function() {
+  const navLinks = document.querySelectorAll('.nav-list a');
+  const sectionIds = Array.from(navLinks).map(a => a.getAttribute('href').substring(1));
+
+  function updateActive() {
+    let current = '';
+    for (const id of sectionIds) {
+      const el = document.getElementById(id);
+      if (el) {
+        const rect = el.getBoundingClientRect();
+        if (rect.top <= 80) current = id;
+      }
+    }
+    navLinks.forEach(link => {
+      const href = link.getAttribute('href').substring(1);
+      if (href === current) {
+        link.classList.add('active');
+      } else {
+        link.classList.remove('active');
+      }
+    });
+  }
+
+  window.addEventListener('scroll', updateActive, { passive: true });
+  updateActive();
+})();
+</script>
+</div> <!-- End .page-wrapper -->

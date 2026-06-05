@@ -29,6 +29,7 @@
 | 4 | [⚡ Analisis Performa](#4--analisis-performa) | Perbandingan kecepatan & metrik |
 | 5 | [💻 Instruksi Eksekusi](#5--instruksi-eksekusi) | Cara menjalankan simulasi |
 | 6 | [📚 Konsep Kunci](#6--konsep-kunci) | Teori multiprocessing yang digunakan |
+| 7 | [👥 Tim Pengembang](#-tim-pengembang) | Anggota kelompok pengembang |
 
 ---
 
@@ -273,6 +274,15 @@ Program akan secara otomatis:
 | **Kasus proyek ini** | ❌ Kurang tepat | ✅ **Pilihan yang tepat** |
 
 > Karena `inspeksi_log_jaringan()` melibatkan komputasi berat (nested loop CPU-bound), `multiprocessing` adalah pilihan yang **jauh lebih tepat** daripada `threading`.
+
+---
+
+## 👥 Tim Pengembang
+
+| No. | Nama | NIM |
+|:---:|------|-----|
+| 1 | **Lifyana Nailah Azzahra** | 152024107 |
+| 2 | **Nik Intan Elyana** | 152024132 |
 
 ---
 
